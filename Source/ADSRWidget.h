@@ -62,9 +62,9 @@ private:
 
     juce::Colour backgroundColour;    // dark slate graphite #2B2B2B rgb(43, 43, 43)
     juce::Colour pathColour;          // bright neon blue #58FAFF rgb(88, 250, 255)
-    juce::Colour gradientStartColour; // light teal #449C9E rgb(68, 156, 158)  #53E7EB rgb(83, 231, 235)
+    juce::Colour gradientStartColour; // dark teal #3E4747 rgb(62, 71, 71)
     juce::Colour gradientMidColour;   // teal 449C9E rgb(68, 156, 158)
-    juce::Colour gradientEndColour;   // dark teal #3E4747 rgb(62, 71, 71)
+    juce::Colour gradientEndColour;   // light teal #449C9E rgb(68, 156, 158)
     juce::Colour pointColour;         // royal blue #003AA0 rgb(0, 58, 160)
     juce::Colour controlPointColour;  // magenta #82003D rgb(0, 58, 160)
     
