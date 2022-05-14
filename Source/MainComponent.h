@@ -1,13 +1,9 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "ADSRWidget.h"
 
-//==============================================================================
-/*
-    This component lives inside our window, and this is where you should put all
-    your controls and content.
-*/
-class MainComponent  : public juce::Component
+class MainComponent : public juce::Component
 {
 public:
     //==============================================================================
@@ -20,8 +16,10 @@ public:
 
 private:
     //==============================================================================
-    // Your private member variables go here...
+    
+    juce::Colour backgroundColour;    // dark slate graphite #2B2B2B rgb(43, 43, 43)
 
+    ADSRWidget adsrWidget;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

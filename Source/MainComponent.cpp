@@ -1,9 +1,13 @@
 #include "MainComponent.h"
 
 //==============================================================================
-MainComponent::MainComponent()
+MainComponent::MainComponent() :
+    backgroundColour (43, 43, 43),
+    adsrWidget()
 {
     setSize (600, 400);
+    
+    addAndMakeVisible (adsrWidget);
 }
 
 MainComponent::~MainComponent()
@@ -13,17 +17,20 @@ MainComponent::~MainComponent()
 //==============================================================================
 void MainComponent::paint (juce::Graphics& g)
 {
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
-
-    g.setFont (juce::Font (16.0f));
-    g.setColour (juce::Colours::white);
-    g.drawText ("Hello World!", getLocalBounds(), juce::Justification::centred, true);
+    //g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
+    
+    g.fillAll (backgroundColour);
 }
 
 void MainComponent::resized()
 {
-    // This is called when the MainComponent is resized.
-    // If you add any child components, this is where you should
-    // update their positions.
+    auto bounds = getLocalBounds().reduced(10);
+    auto topEdgeY = bounds.getY();
+//    auto bottomEdgeY = bounds.getHeight();
+    auto leftEdgeX = bounds.getX();
+//    auto rightEdgeX = bounds.getRight();
+    auto width = bounds.getWidth();
+    auto height = bounds.getHeight();
+    
+    adsrWidget.setBounds (leftEdgeX, topEdgeY, width, height);
 }
