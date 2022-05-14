@@ -8,29 +8,28 @@
 #include "ADSRWidget.h"
 
 ADSRWidget::ADSRWidget() :
-    attackDurationValue (0.1f),
-    decayDurationValue (0.1f),
-    sustainDurationValue (1.0f),
-    releaseDurationValue (0.1f),
-    attackCurveValue (0.f),
-    decayCurveValue (0.f),
-    releaseCurveValue (0.f),
+    attackDurationValue (MAX_ADSR_DURATION),
+    decayDurationValue (MAX_ADSR_DURATION),
+    sustainLevelValue (DEFAULT_SUSTAIN_LEVEL),
+    releaseDurationValue (MAX_ADSR_DURATION),
     pointDiameter (24),
     pointFontSize (16),
     backgroundColour (43, 43, 43),
     pathColour (88, 250, 255),
     gradientStartColour (62, 71, 71),
-    gradientMidColour (68, 156, 158), // teal
+    gradientMidColour (68, 156, 158),
     gradientEndColour (83, 231, 235),
     pointColour (0, 58, 160),
     controlPointColour (0, 58, 160),
     gradient(),
-    attackStartPoint(),
+    attackRatePoint (0.5f,0.5f),
     attackControlPoint(),
     decayStartPoint(),
+    decayRatePoint (0.5f,0.5f),
     decayControlPoint(),
     sustainStartPoint(),
     releaseStartPoint(),
+    releaseRatePoint (0.5f,0.5f),
     releaseControlPoint(),
     releaseEndPoint(),
     attackRectangle(),
@@ -40,29 +39,36 @@ ADSRWidget::ADSRWidget() :
     path(),
     framePath()
 {
-    
+
 }
     
 void ADSRWidget::paint (juce::Graphics &g)
 {
-    g.setColour (juce::Colours::green);
+    g.setColour (juce::Colours::grey);
     g.drawRect (getLocalBounds());
     
     drawGraph(g);
     drawPoints(g);
+    
+    g.setColour (juce::Colours::red);
+    g.drawRect (attackRectangle);
+    
+    g.setColour (juce::Colours::blue);
+    g.drawRect (decayRectangle);
+    
+    g.setColour (juce::Colours::green);
+    g.drawRect (releaseRectangle);
 }
 
 void ADSRWidget::resized()
 {
-    auto bounds = getLocalBounds().reduced(20);
+    auto bounds = getLocalBounds().reduced(PADDING);
     auto topEdgeY = bounds.getY();
     auto bottomEdgeY = bounds.getHeight();
     auto leftEdgeX = bounds.getX();
-    auto rightEdgeX = bounds.getRight();
-    auto width = bounds.getWidth();
-    auto height = bounds.getHeight();
-    
-    auto segmentWidth = static_cast<float> (width / 4.f);
+//    auto rightEdgeX = bounds.getRight();
+//    auto width = bounds.getWidth();
+//    auto height = bounds.getHeight();
     
     gradient.clearColours();
 
@@ -74,47 +80,96 @@ void ADSRWidget::resized()
     gradient.addColour (0.15f, gradientMidColour);
     gradient.addColour (1.f, gradientEndColour);
     
-    attackRectangle.setX (leftEdgeX);
-    attackRectangle.setY (topEdgeY);
-    attackRectangle.setWidth (segmentWidth);
-    attackRectangle.setHeight (height);
-    
-    // reposition the Attack, Decay, Sustain, Release start, control, end points
-    attackStartPoint.setXY (leftEdgeX, bottomEdgeY);
-    
-    auto attackControlPointX = static_cast<float> ((leftEdgeX + segmentWidth) / 2.f);
-    auto attackControlPointY = static_cast<float> (height / 2.f);
-    attackControlPoint.setXY (attackControlPointX , attackControlPointY);
-    
-    decayRectangle.setX (leftEdgeX + segmentWidth);
-    decayRectangle.setY (topEdgeY);
-    decayRectangle.setWidth (segmentWidth);
-    decayRectangle.setHeight (static_cast<float> (height / 2.f));
-    
-    decayStartPoint.setXY (leftEdgeX + segmentWidth, topEdgeY);
-    auto decayControlPointX = static_cast<float> (leftEdgeX + segmentWidth + (segmentWidth / 2.f));
-    auto decayControlPointY = static_cast<float> (height / 4.f);
-    decayControlPoint.setXY (decayControlPointX, decayControlPointY);
-
-    sustainStartPoint.setXY (leftEdgeX + segmentWidth + segmentWidth, topEdgeY + static_cast<float> (height / 2.f));
-    
-    auto releaseX = leftEdgeX + segmentWidth + segmentWidth + segmentWidth;
-    auto releaseY = topEdgeY + static_cast<float> (height / 2.f);
-    releaseRectangle.setX (releaseX);
-    releaseRectangle.setY (releaseY);
-    releaseRectangle.setWidth (segmentWidth);
-    releaseRectangle.setHeight (static_cast<float> (height / 2.f));
-
-    releaseStartPoint.setXY (releaseX, releaseY);
-    releaseControlPoint.setXY (releaseX + static_cast<float> (segmentWidth / 2.f), releaseY + static_cast<float> (height / 4.f));
-    releaseEndPoint.setXY (rightEdgeX, bottomEdgeY);
+    repositionPoints (bounds);
+    resizeSegments (bounds);
 }
 
 //==============================================================================
 
+float ADSRWidget::getAttackDuration() { return static_cast<float> (attackDurationValue.getValue()); }
+
+float ADSRWidget::getDecayDuration() { return static_cast<float> (decayDurationValue.getValue()); }
+
+float ADSRWidget::getSustainLevel() { return static_cast<float> (sustainLevelValue.getValue()); }
+
+float ADSRWidget::getReleaseDuration() { return static_cast<float> (releaseDurationValue.getValue()); }
+
+void ADSRWidget::repositionPoints (const juce::Rectangle<int>& bounds)
+{
+    auto topEdgeY = bounds.getY();
+    auto bottomEdgeY = bounds.getHeight();
+    auto leftEdgeX = bounds.getX();
+    auto rightEdgeX = bounds.getRight();
+    auto width = bounds.getWidth();
+    auto height = bounds.getHeight();
+    auto equalSegmentWidth = static_cast<float> (width / 4.f);
+    
+    auto attackDuration = getAttackDuration();
+    auto decayDuration = getDecayDuration();
+    auto sustainLevel = getSustainLevel();
+    auto releaseDuration = getReleaseDuration();
+
+    // reposition the segment points
+   
+    auto attackSegmentWidth = static_cast<float> (equalSegmentWidth * attackDuration);
+    auto decaySegmentWidth = static_cast<float> (equalSegmentWidth * decayDuration);
+    auto releaseSegmentWidth = static_cast<float> (equalSegmentWidth * releaseDuration);
+    
+    // segment point A
+    decayStartPoint.setXY (leftEdgeX + attackSegmentWidth, topEdgeY);
+    
+    // segment point D
+    sustainStartPoint.setXY (decayStartPoint.getX() + decaySegmentWidth, (topEdgeY + height) - static_cast<float> (height * sustainLevel));
+    
+    // segment point S
+    releaseStartPoint.setXY (sustainStartPoint.getX() + equalSegmentWidth, sustainStartPoint.getY());
+    
+    // segment point R
+    releaseEndPoint.setXY (releaseStartPoint.getX() + releaseSegmentWidth, bottomEdgeY);
+    
+    // reposition the bezier curve control points
+    auto attachControlPointX = juce::jmap (attackRatePoint.getX(), 0.f, 1.f, static_cast<float> (leftEdgeX), decayStartPoint.getX() );
+    auto attackControlPointY = juce::jmap (attackRatePoint.getY(), 0.f, 1.f, static_cast<float> (topEdgeY), static_cast<float> (bottomEdgeY));
+    attackControlPoint.setXY (attachControlPointX, attackControlPointY);
+    
+    auto decayControlPointX = juce::jmap (decayRatePoint.getX(), 0.f, 1.f, decayStartPoint.getX(), decayStartPoint.getX() + decaySegmentWidth);
+    auto decayControlPointY = juce::jmap (decayRatePoint.getY(), 0.f, 1.f, decayStartPoint.getY(), sustainStartPoint.getY());
+    decayControlPoint.setXY (decayControlPointX, decayControlPointY);
+    
+    auto releaseControlPointX = juce::jmap (releaseRatePoint.getX(), 0.f, 1.f, releaseStartPoint.getX(), releaseStartPoint.getX() + releaseSegmentWidth);
+    auto releaseControlPointY = juce::jmap (releaseRatePoint.getY(), 0.f, 1.f, releaseStartPoint.getY(), static_cast<float> (bottomEdgeY));
+    releaseControlPoint.setXY (releaseControlPointX, releaseControlPointY);
+}
+
+void ADSRWidget::resizeSegments (const juce::Rectangle<int>& bounds)
+{
+    auto topEdgeY = bounds.getY();
+    auto bottomEdgeY = bounds.getHeight();
+    auto leftEdgeX = bounds.getX();
+    auto rightEdgeX = bounds.getRight();
+    auto width = bounds.getWidth();
+    auto height = bounds.getHeight();
+    
+    attackRectangle.setX (leftEdgeX);
+    attackRectangle.setY (topEdgeY);
+    attackRectangle.setWidth (decayStartPoint.getX() - leftEdgeX);
+    attackRectangle.setHeight (bottomEdgeY - decayStartPoint.getY() );
+    
+    decayRectangle.setX (decayStartPoint.getX());
+    decayRectangle.setY (topEdgeY);
+    decayRectangle.setWidth (sustainStartPoint.getX() - decayStartPoint.getX());
+    decayRectangle.setHeight (sustainStartPoint.getY() - topEdgeY);
+    
+    releaseRectangle.setX (releaseStartPoint.getX());
+    releaseRectangle.setY (releaseStartPoint.getY());
+    releaseRectangle.setWidth (releaseEndPoint.getX() - releaseStartPoint.getX());
+    releaseRectangle.setHeight (releaseEndPoint.getY() - releaseStartPoint.getY());
+    
+}
+
 void ADSRWidget::drawGraph (juce::Graphics& g)
 {
-    auto bounds = getLocalBounds().reduced(20).toFloat();
+    auto bounds = getLocalBounds().reduced(PADDING).toFloat();
     auto leftEdgeX = bounds.getX();
 //    auto topEdgeY = bounds.getY();
     auto rightEdgeX = bounds.getRight();
@@ -124,11 +179,8 @@ void ADSRWidget::drawGraph (juce::Graphics& g)
     
     // start path at bottom left corner
     path.startNewSubPath (leftEdgeX, bottomEdgeY);
-    
-    // from bottom left line to Attack start
-    path.lineTo (attackStartPoint);
 
-    // from Attack start point bezier curve through Attack control point to Decay start point
+    // from bottom left point bezier curve through Attack control point to Decay start point
     path.quadraticTo (attackControlPoint, decayStartPoint);
     
     // from Decay start point bezier curve through Decay control point to Sustain start point

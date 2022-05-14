@@ -9,6 +9,15 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
+#define PADDING 20
+
+#define MIN_ADSR_DURATION 0.0f
+#define MAX_ADSR_DURATION 1.0f
+
+#define MIN_SUSTAIN_LEVEL 0.0f
+#define MAX_SUSTAIN_LEVEL 1.0f
+#define DEFAULT_SUSTAIN_LEVEL 0.5f  // half way some decay, some release
+
 class ADSRWidget : public juce::Component
 {
 public:
@@ -20,34 +29,40 @@ public:
     void resized() override;
 
     //==============================================================================
+
+    float getAttackDuration();
+    
+    float getDecayDuration();
+
+    float getSustainLevel();
+    
+    float getReleaseDuration();
+    
+    float getAttackRate();
+
+    float getDecayRate();
+    
+    float getReleaseRate();
+
+    // reposition the ADSR control points based on the widget bounds and ADSR values
+    void repositionPoints (const juce::Rectangle<int>& bounds);
+    
+    // resize and reposition the ADSR segment recetangles based on the control points
+    void resizeSegments (const juce::Rectangle<int>& bounds);
     
     void drawGraph (juce::Graphics& g);
     
     void drawPoints (juce::Graphics& g);
     
     void drawControlPoint (juce::Graphics& g, const juce::Point<float>& controlPoint);
-    
+
 private:
-
-    /*
-        A D S R duration time values in seconds 0.1 to 1.0
-    */
-
+    
+    // ADSR parameters ranging [0..1]
     juce::Value attackDurationValue;
     juce::Value decayDurationValue;
-    juce::Value sustainDurationValue;
+    juce::Value sustainLevelValue;
     juce::Value releaseDurationValue;
-    
-    /*
-        A D R curvature values range from +50% to -50%
-     
-        sustain is flat line segment only horizontal time value
-        no sustain curve value
-    */
-
-    juce::Value attackCurveValue;
-    juce::Value decayCurveValue;
-    juce::Value releaseCurveValue;
     
     float pointDiameter;
     int pointFontSize;
@@ -81,22 +96,24 @@ private:
         the control point will disappear on mouse up off the segment area
     */
 
-    juce::Point<float> attackStartPoint;
-    juce::Point<float> attackControlPoint;
-
+    juce::Point<float> attackRatePoint;      // attack rate XY model { [0.f ... 0.9f] , [0.f ... 0.9f] }
+    juce::Point<float> attackControlPoint;   // attack rate draggable graph control point
+    
     juce::Point<float> decayStartPoint;      // decay starts where attack ends
-    juce::Point<float> decayControlPoint;
+    juce::Point<float> decayRatePoint;       // decay rate XY model { [0.f ... 0.9f] , [0.f ... 0.9f] }
+    juce::Point<float> decayControlPoint;    // decay rate draggable graph control point
     
-    juce::Point<float> sustainStartPoint;    // sustain starts where decay ends
+    juce::Point<float> sustainStartPoint;    // sustain starts where decay ends, vertically draggable to adjust sustain level
     
-    juce::Point<float> releaseStartPoint;    // release starts where sustain ends
-    juce::Point<float> releaseControlPoint;
-    juce::Point<float> releaseEndPoint;
+    juce::Point<float> releaseStartPoint;    // release starts where sustain ends, also vertically draggable to adjust sustain level
+    juce::Point<float> releaseRatePoint;     // release rate XY model { [0.f ... 0.9f] , [0.f ... 0.9f] }
+    juce::Point<float> releaseControlPoint;  // release rate draggable graph control point
+    juce::Point<float> releaseEndPoint;      // release duration draggable graph control point
     
-    juce::Rectangle<float> attackRectangle;
-    juce::Rectangle<float> decayRectangle;
-    juce::Rectangle<float> sustainRectangle;
-    juce::Rectangle<float> releaseRectangle;
+    juce::Rectangle<int> attackRectangle;
+    juce::Rectangle<int> decayRectangle;
+    juce::Rectangle<int> sustainRectangle;
+    juce::Rectangle<int> releaseRectangle;
 
     juce::Path path;
     juce::Path framePath;
