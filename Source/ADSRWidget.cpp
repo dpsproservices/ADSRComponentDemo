@@ -20,7 +20,8 @@ ADSRWidget::ADSRWidget() :
     backgroundColour (43, 43, 43),
     pathColour (88, 250, 255),
     gradientStartColour (62, 71, 71),
-    gradientEndColour (67, 151, 154),
+    gradientMidColour (68, 156, 158), // teal
+    gradientEndColour (83, 231, 235),
     pointColour (0, 58, 160),
     controlPointColour (0, 58, 160),
     gradient(),
@@ -70,6 +71,7 @@ void ADSRWidget::resized()
     gradient.point2 = juce::Point<float> (leftEdgeX, topEdgeY);
     
     gradient.addColour (0.f, gradientStartColour);
+    gradient.addColour (0.15f, gradientMidColour);
     gradient.addColour (1.f, gradientEndColour);
     
     attackRectangle.setX (leftEdgeX);
@@ -155,8 +157,8 @@ void ADSRWidget::drawGraph (juce::Graphics& g)
     
     framePath.clear();
 
-    // start frame path at bottom left corner
-    framePath.startNewSubPath (leftEdgeX, bottomEdgeY);
+    // start frame path at bottom left corner minus stroke width
+    framePath.startNewSubPath (leftEdgeX - 4, bottomEdgeY);
     
     // from bottom left line to Attack start
     framePath.lineTo (rightEdgeX, bottomEdgeY);
