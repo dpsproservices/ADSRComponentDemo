@@ -8,6 +8,7 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
+#include "CustomLookAndFeel.h"
 
 #define PADDING 20
 
@@ -27,6 +28,18 @@ public:
     void paint (juce::Graphics &g) override;
     
     void resized() override;
+    
+    void mouseEnter (const juce::MouseEvent& event) override;
+    
+    void mouseMove (const juce::MouseEvent& event) override;
+    
+    void mouseExit (const juce::MouseEvent& event) override;
+
+    void mouseDown (const juce::MouseEvent& event) override;
+    
+    void mouseDrag (const juce::MouseEvent& event) override;
+    
+    void mouseUp (const juce::MouseEvent& event) override;
 
     //==============================================================================
 
@@ -45,10 +58,10 @@ public:
     float getReleaseRate();
 
     // reposition the ADSR control points based on the widget bounds and ADSR values
-    void repositionPoints (const juce::Rectangle<int>& bounds);
+    void repositionPoints();
     
     // resize and reposition the ADSR segment recetangles based on the control points
-    void resizeSegments (const juce::Rectangle<int>& bounds);
+    void resizeSegments();
     
     void drawGraph (juce::Graphics& g);
     
@@ -117,6 +130,13 @@ private:
 
     juce::Path path;
     juce::Path framePath;
+    
+    CustomLookAndFeel customLookAndFeel;
+    
+    juce::Slider attackDurationSlider;
+    juce::Slider decayDurationSlider;
+    juce::Slider sustainLevelSlider;
+    juce::Slider releaseDurationSlider;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ADSRWidget)
 };

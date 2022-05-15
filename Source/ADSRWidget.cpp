@@ -6,6 +6,7 @@
 //
 
 #include "ADSRWidget.h"
+#include "CustomLookAndFeel.h"
 
 ADSRWidget::ADSRWidget() :
     attackDurationValue (MAX_ADSR_DURATION),
@@ -37,13 +38,75 @@ ADSRWidget::ADSRWidget() :
     sustainRectangle(),
     releaseRectangle(),
     path(),
-    framePath()
+    framePath(),
+    attackDurationSlider(),
+    decayDurationSlider(),
+    sustainLevelSlider(),
+    releaseDurationSlider()
 {
-
+    attackDurationSlider.setSliderStyle (juce::Slider::SliderStyle::LinearHorizontal);
+    attackDurationSlider.setTextBoxStyle (juce::Slider::NoTextBox, false, 0, 0);
+    attackDurationSlider.setLookAndFeel (&customLookAndFeel);
+    attackDurationSlider.setRange (MIN_ADSR_DURATION, MAX_ADSR_DURATION);
+    attackDurationSlider.getValueObject().referTo (attackDurationValue);
+    attackDurationSlider.onValueChange = [this] ()
+    {
+        //attackDurationValue = attackDurationSlider.getValue();
+        repositionPoints();
+        resizeSegments();
+        repaint();
+    };
+    
+    decayDurationSlider.setSliderStyle (juce::Slider::SliderStyle::LinearHorizontal);
+    decayDurationSlider.setTextBoxStyle (juce::Slider::NoTextBox, false, 0, 0);
+    decayDurationSlider.setLookAndFeel (&customLookAndFeel);
+    decayDurationSlider.setRange (MIN_ADSR_DURATION, MAX_ADSR_DURATION);
+    decayDurationSlider.getValueObject().referTo (decayDurationValue);
+    decayDurationSlider.onValueChange = [this] ()
+    {
+        //decayDurationValue = decayDurationSlider.getValue();
+        repositionPoints();
+        resizeSegments();
+        repaint();
+    };
+    
+    sustainLevelSlider.setSliderStyle (juce::Slider::SliderStyle::LinearBarVertical);
+    sustainLevelSlider.setTextBoxStyle (juce::Slider::NoTextBox, false, 0, 0);
+    sustainLevelSlider.setLookAndFeel (&customLookAndFeel);
+    sustainLevelSlider.setRange (MIN_SUSTAIN_LEVEL, MAX_SUSTAIN_LEVEL);
+    sustainLevelSlider.getValueObject().referTo (sustainLevelValue);
+    sustainLevelSlider.onValueChange = [this] ()
+    {
+        //sustainLevelValue = sustainLevelSlider.getValue();
+        repositionPoints();
+        resizeSegments();
+        repaint();
+    };
+    
+    releaseDurationSlider.setSliderStyle (juce::Slider::SliderStyle::LinearHorizontal);
+    releaseDurationSlider.setTextBoxStyle (juce::Slider::NoTextBox, false, 0, 0);
+    releaseDurationSlider.setLookAndFeel (&customLookAndFeel);
+    releaseDurationSlider.setRange (MIN_ADSR_DURATION, MAX_ADSR_DURATION);
+    releaseDurationSlider.getValueObject().referTo (releaseDurationValue);
+    releaseDurationSlider.onValueChange = [this] ()
+    {
+        //releaseDurationValue = releaseDurationSlider.getValue();
+        repositionPoints();
+        resizeSegments();
+        repaint();
+    };
+    
+    addAndMakeVisible (attackDurationSlider);
+    addAndMakeVisible (decayDurationSlider);
+    addAndMakeVisible (sustainLevelSlider);
+    addAndMakeVisible (releaseDurationSlider);
 }
     
 void ADSRWidget::paint (juce::Graphics &g)
 {
+//    repositionPoints();
+//    resizeSegments();
+    
     g.setColour (juce::Colours::grey);
     g.drawRect (getLocalBounds());
     
@@ -55,6 +118,9 @@ void ADSRWidget::paint (juce::Graphics &g)
     
     g.setColour (juce::Colours::blue);
     g.drawRect (decayRectangle);
+    
+    g.setColour (juce::Colours::yellow);
+    g.drawRect (sustainRectangle);
     
     g.setColour (juce::Colours::green);
     g.drawRect (releaseRectangle);
@@ -80,8 +146,38 @@ void ADSRWidget::resized()
     gradient.addColour (0.15f, gradientMidColour);
     gradient.addColour (1.f, gradientEndColour);
     
-    repositionPoints (bounds);
-    resizeSegments (bounds);
+    repositionPoints();
+    resizeSegments();
+}
+
+void ADSRWidget::mouseEnter (const juce::MouseEvent& event)
+{
+    
+}
+
+void ADSRWidget::mouseMove (const juce::MouseEvent& event)
+{
+    
+}
+
+void ADSRWidget::mouseExit (const juce::MouseEvent& event)
+{
+    
+}
+
+void ADSRWidget::mouseDown (const juce::MouseEvent& event)
+{
+    
+}
+
+void ADSRWidget::mouseDrag (const juce::MouseEvent& event)
+{
+    
+}
+
+void ADSRWidget::mouseUp (const juce::MouseEvent& event)
+{
+    
 }
 
 //==============================================================================
@@ -94,12 +190,13 @@ float ADSRWidget::getSustainLevel() { return static_cast<float> (sustainLevelVal
 
 float ADSRWidget::getReleaseDuration() { return static_cast<float> (releaseDurationValue.getValue()); }
 
-void ADSRWidget::repositionPoints (const juce::Rectangle<int>& bounds)
+void ADSRWidget::repositionPoints()
 {
+    auto bounds = getLocalBounds().reduced (PADDING);
     auto topEdgeY = bounds.getY();
     auto bottomEdgeY = bounds.getHeight();
     auto leftEdgeX = bounds.getX();
-    auto rightEdgeX = bounds.getRight();
+//    auto rightEdgeX = bounds.getRight();
     auto width = bounds.getWidth();
     auto height = bounds.getHeight();
     auto equalSegmentWidth = static_cast<float> (width / 4.f);
@@ -119,7 +216,9 @@ void ADSRWidget::repositionPoints (const juce::Rectangle<int>& bounds)
     decayStartPoint.setXY (leftEdgeX + attackSegmentWidth, topEdgeY);
     
     // segment point D
-    sustainStartPoint.setXY (decayStartPoint.getX() + decaySegmentWidth, (topEdgeY + height) - static_cast<float> (height * sustainLevel));
+    auto decayX = decayStartPoint.getX() + decaySegmentWidth;
+    auto decayY = (topEdgeY + height) - static_cast<float> (height * sustainLevel) - (pointDiameter / 2.f);
+    sustainStartPoint.setXY (decayX, decayY);
     
     // segment point S
     releaseStartPoint.setXY (sustainStartPoint.getX() + equalSegmentWidth, sustainStartPoint.getY());
@@ -141,30 +240,38 @@ void ADSRWidget::repositionPoints (const juce::Rectangle<int>& bounds)
     releaseControlPoint.setXY (releaseControlPointX, releaseControlPointY);
 }
 
-void ADSRWidget::resizeSegments (const juce::Rectangle<int>& bounds)
+void ADSRWidget::resizeSegments()
 {
+    auto bounds = getLocalBounds().reduced (PADDING);
     auto topEdgeY = bounds.getY();
     auto bottomEdgeY = bounds.getHeight();
     auto leftEdgeX = bounds.getX();
-    auto rightEdgeX = bounds.getRight();
+//    auto rightEdgeX = bounds.getRight();
     auto width = bounds.getWidth();
-    auto height = bounds.getHeight();
+//    auto height = bounds.getHeight();
+    auto equalSegmentWidth = static_cast<float> (width / 4.f);
     
     attackRectangle.setX (leftEdgeX);
     attackRectangle.setY (topEdgeY);
     attackRectangle.setWidth (decayStartPoint.getX() - leftEdgeX);
-    attackRectangle.setHeight (bottomEdgeY - decayStartPoint.getY() );
+    attackRectangle.setHeight (bottomEdgeY - decayStartPoint.getY());
     
     decayRectangle.setX (decayStartPoint.getX());
     decayRectangle.setY (topEdgeY);
     decayRectangle.setWidth (sustainStartPoint.getX() - decayStartPoint.getX());
     decayRectangle.setHeight (sustainStartPoint.getY() - topEdgeY);
     
+    sustainRectangle.setBounds (sustainStartPoint.getX(), topEdgeY, equalSegmentWidth, releaseEndPoint.getY() - topEdgeY);
+    
     releaseRectangle.setX (releaseStartPoint.getX());
     releaseRectangle.setY (releaseStartPoint.getY());
     releaseRectangle.setWidth (releaseEndPoint.getX() - releaseStartPoint.getX());
     releaseRectangle.setHeight (releaseEndPoint.getY() - releaseStartPoint.getY());
     
+    attackDurationSlider.setBounds (attackRectangle);
+    decayDurationSlider.setBounds (decayRectangle);
+    sustainLevelSlider.setBounds (sustainRectangle);
+    releaseDurationSlider.setBounds (releaseRectangle);
 }
 
 void ADSRWidget::drawGraph (juce::Graphics& g)
