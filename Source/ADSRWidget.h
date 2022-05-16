@@ -10,9 +10,9 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "CustomLookAndFeel.h"
 
-#define PADDING 20
+#define PADDING 40
 
-#define MIN_ADSR_DURATION 0.0f
+#define MIN_ADSR_DURATION 0.1f
 #define MAX_ADSR_DURATION 1.0f
 
 #define MIN_SUSTAIN_LEVEL 0.0f
@@ -71,6 +71,15 @@ public:
 
 private:
     
+    juce::Rectangle<int> bounds;
+    int topEdgeY;
+    int bottomEdgeY;
+    int leftEdgeX;
+    int rightEdgeX;
+    int width;
+    int height;
+    int equalSegmentWidth;
+    
     // ADSR parameters ranging [0..1]
     juce::Value attackDurationValue;
     juce::Value decayDurationValue;
@@ -107,19 +116,19 @@ private:
         while holding mouse down on the draggable segment area to adjust it
      
         the control point will disappear on mouse up off the segment area
+     
+        model control points bound inside the segment area rectangle
+        with XY coordinates ranging { [0.f ... 0.9f] , [0.f ... 0.9f] }
     */
 
-    juce::Point<float> attackRatePoint;      // attack rate XY model { [0.f ... 0.9f] , [0.f ... 0.9f] }
+    juce::Point<float> attackRatePoint;      // attack rate XY model
     juce::Point<float> attackControlPoint;   // attack rate draggable graph control point
-    
     juce::Point<float> decayStartPoint;      // decay starts where attack ends
-    juce::Point<float> decayRatePoint;       // decay rate XY model { [0.f ... 0.9f] , [0.f ... 0.9f] }
+    juce::Point<float> decayRatePoint;       // decay rate XY model
     juce::Point<float> decayControlPoint;    // decay rate draggable graph control point
-    
     juce::Point<float> sustainStartPoint;    // sustain starts where decay ends, vertically draggable to adjust sustain level
-    
     juce::Point<float> releaseStartPoint;    // release starts where sustain ends, also vertically draggable to adjust sustain level
-    juce::Point<float> releaseRatePoint;     // release rate XY model { [0.f ... 0.9f] , [0.f ... 0.9f] }
+    juce::Point<float> releaseRatePoint;     // release rate XY model
     juce::Point<float> releaseControlPoint;  // release rate draggable graph control point
     juce::Point<float> releaseEndPoint;      // release duration draggable graph control point
     

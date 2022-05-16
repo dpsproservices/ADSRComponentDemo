@@ -35,11 +35,33 @@ struct CustomLookAndFeel : juce::LookAndFeel_V4
     {
         if (style == juce::Slider::SliderStyle::LinearBarVertical)
         {
+            auto lineY = juce::jmap (sliderPos, 0.f, 1.f, static_cast<float> (y), static_cast<float> (height));
+            
+            DBG("sliderPos: " + juce::String(sliderPos));
+            DBG("minSliderPos: " + juce::String(minSliderPos));
+            DBG("maxSliderPos: " + juce::String(maxSliderPos));
+            DBG("x: " + juce::String(x));
+            DBG("y: " + juce::String(y));
+            DBG("width: " + juce::String(width));
+            DBG("height: " + juce::String(height));
+            DBG("lineY: " + juce::String(lineY));
+            
             g.setColour (slider.findColour (juce::Slider::thumbColourId));
             g.drawHorizontalLine (sliderPos, x, width);
         }
         else if (style == juce::Slider::SliderStyle::LinearHorizontal)
         {
+            auto lineX = juce::jmap (sliderPos, 0.1f, 1.f, static_cast<float> (x), static_cast<float> (width));
+            
+            DBG("sliderPos: " + juce::String(sliderPos));
+            DBG("minSliderPos: " + juce::String(minSliderPos));
+            DBG("maxSliderPos: " + juce::String(maxSliderPos));
+            DBG("x: " + juce::String(x));
+            DBG("y: " + juce::String(y));
+            DBG("width: " + juce::String(width));
+            DBG("height: " + juce::String(height));
+            DBG("lineX: " + juce::String(lineX));
+            
             g.setColour (slider.findColour (juce::Slider::thumbColourId));
             g.drawVerticalLine (sliderPos, y, height);
         }

@@ -5,7 +5,7 @@ MainComponent::MainComponent() :
     backgroundColour (43, 43, 43),
     adsrWidget()
 {
-    setSize (600, 400);
+    setSize (680, 440);
     
     addAndMakeVisible (adsrWidget);
 }
@@ -24,7 +24,7 @@ void MainComponent::paint (juce::Graphics& g)
 
 void MainComponent::resized()
 {
-    auto bounds = getLocalBounds().reduced(10);
+    auto bounds = getLocalBounds().reduced(PADDING);
     auto topEdgeY = bounds.getY();
 //    auto bottomEdgeY = bounds.getHeight();
     auto leftEdgeX = bounds.getX();
