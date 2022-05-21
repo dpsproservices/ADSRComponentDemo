@@ -36,10 +36,6 @@ ADSRWidget::ADSRWidget() :
     decayRectangle(),
     sustainRectangle(),
     releaseRectangle(),
-    attackDraggableBounds(),
-    decayDraggableBounds(),
-    sustainDraggableBounds(),
-    releaseDraggableBounds(),
     path(),
     framePath()
 {
@@ -95,18 +91,6 @@ void ADSRWidget::paint (juce::Graphics &g)
     
     g.setColour (juce::Colours::green);
     g.drawRect (releaseRectangle);
-    
-    g.setColour (juce::Colours::red);
-    g.drawRect (attackDraggableBounds);
-    
-    g.setColour (juce::Colours::blue);
-    g.drawRect (decayDraggableBounds);
-    
-    g.setColour (juce::Colours::yellow);
-    g.drawRect (sustainDraggableBounds);
-    
-    g.setColour (juce::Colours::green);
-    g.drawRect (releaseDraggableBounds);
 }
 
 void ADSRWidget::resized()
@@ -188,8 +172,8 @@ void ADSRWidget::mouseDrag (const juce::MouseEvent& mouseEvent)
                 static_cast<float> (draggedComponent->getBounds().getX()),
                 static_cast<float> (leftLimitX),
                 static_cast<float> (rightLimitX),
-                0.1f,
-                1.f
+                static_cast<float> (MIN_ADSR_DURATION),
+                static_cast<float> (MAX_ADSR_DURATION)
             );
         }
         else if (draggedComponent == draggablePoints.getUnchecked (1))
@@ -225,8 +209,8 @@ void ADSRWidget::mouseDrag (const juce::MouseEvent& mouseEvent)
                 static_cast<float> (draggedComponent->getBounds().getX()),
                 static_cast<float> (leftLimitX),
                 static_cast<float> (rightLimitX),
-                0.1f,
-                1.f
+                static_cast<float> (MIN_ADSR_DURATION),
+                static_cast<float> (MAX_ADSR_DURATION)
             );
         }
         else if (draggedComponent == draggablePoints.getUnchecked (2))
@@ -299,8 +283,8 @@ void ADSRWidget::mouseDrag (const juce::MouseEvent& mouseEvent)
                 static_cast<float> (draggedComponent->getBounds().getX()),
                 static_cast<float> (leftLimitX),
                 static_cast<float> (rightLimitX),
-                0.1f,
-                1.f
+                static_cast<float> (MIN_ADSR_DURATION),
+                static_cast<float> (MAX_ADSR_DURATION)
             );
         }
         
@@ -422,34 +406,6 @@ void ADSRWidget::resizeSegments()
     releaseRectangle.setY (releaseStartPoint.getY());
     releaseRectangle.setWidth (releaseEndPoint.getX() - releaseStartPoint.getX());
     releaseRectangle.setHeight (releaseEndPoint.getY() - releaseStartPoint.getY());
-
-    attackDraggableBounds.setBounds (
-        leftEdgeX - OFFSET,
-        topEdgeY - OFFSET,
-        OFFSET + equalSegmentWidth + OFFSET,
-        ADSR_POINT_SIZE
-    );
-    
-    decayDraggableBounds.setBounds (
-        leftEdgeX + equalSegmentWidth - OFFSET,
-        sustainStartPoint.getY() - OFFSET,
-        OFFSET + equalSegmentWidth + OFFSET,
-        ADSR_POINT_SIZE
-    );
-    
-    sustainDraggableBounds.setBounds (
-        releaseStartPoint.getX() - OFFSET,
-        topEdgeY - OFFSET,
-        ADSR_POINT_SIZE,
-        OFFSET + height + OFFSET
-    );
-    
-    releaseDraggableBounds.setBounds (
-        releaseStartPoint.getX() - OFFSET,
-        releaseEndPoint.getY() - OFFSET,
-        OFFSET + equalSegmentWidth + OFFSET,
-        ADSR_POINT_SIZE
-    );
 }
 
 void ADSRWidget::drawGraph (juce::Graphics& g)

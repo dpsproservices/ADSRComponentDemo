@@ -134,11 +134,6 @@ private:
     juce::Rectangle<int> decayRectangle;
     juce::Rectangle<int> sustainRectangle;
     juce::Rectangle<int> releaseRectangle;
-    
-    juce::Rectangle<int> attackDraggableBounds;
-    juce::Rectangle<int> decayDraggableBounds;
-    juce::Rectangle<int> sustainDraggableBounds;
-    juce::Rectangle<int> releaseDraggableBounds;
 
     juce::Path path;
     juce::Path framePath;
