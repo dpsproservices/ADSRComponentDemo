@@ -6,13 +6,19 @@ MainComponent::MainComponent() :
     adsrWidget()
 {
     setSize (680, 440);
-    
     addAndMakeVisible (adsrWidget);
+    
+//    setSize (600, 400);
+//    targetArea.setBounds(450, 250, 150, 140);
+//    addAndMakeVisible (targetArea);
+//    targetSource.setBounds(0,0,50,50);
+//    addAndMakeVisible (targetSource);
+    
+//    setOpaque (false);
+
 }
 
-MainComponent::~MainComponent()
-{
-}
+MainComponent::~MainComponent() { }
 
 //==============================================================================
 void MainComponent::paint (juce::Graphics& g)

@@ -9,6 +9,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "CustomLookAndFeel.h"
+#include "DraggablePoint.h"
 
 #define PADDING 40
 
@@ -19,7 +20,10 @@
 #define MAX_SUSTAIN_LEVEL 1.0f
 #define DEFAULT_SUSTAIN_LEVEL 0.5f  // half way some decay, some release
 
-class ADSRWidget : public juce::Component
+#define DEFAULT_ADSR_POINT_SIZE 40
+#define ADSR_FONT_SIZE 16
+
+class ADSRWidget : public juce::Component //, public juce::DragAndDropContainer
 {
 public:
     
@@ -29,17 +33,25 @@ public:
     
     void resized() override;
     
-    void mouseEnter (const juce::MouseEvent& event) override;
+    //==============================================================================
     
-    void mouseMove (const juce::MouseEvent& event) override;
-    
-    void mouseExit (const juce::MouseEvent& event) override;
+//    void mouseEnter (const juce::MouseEvent& mouseEvent) override;
 
-    void mouseDown (const juce::MouseEvent& event) override;
+//    void mouseMove (const juce::MouseEvent& mouseEvent) override;
+
+//    void mouseExit (const juce::MouseEvent& mouseEvent) override;
+
+    void mouseDown (const juce::MouseEvent& mouseEvent) override;
+
+    void mouseDrag (const juce::MouseEvent& mouseEvent) override;
+
+//    void mouseUp (const juce::MouseEvent& mouseEvent) override;
     
-    void mouseDrag (const juce::MouseEvent& event) override;
+    //==============================================================================
     
-    void mouseUp (const juce::MouseEvent& event) override;
+//    void dragOperationStarted (const juce::DragAndDropTarget::SourceDetails& sourceDetails) override;
+    
+//    void dragOperationEnded (const juce::DragAndDropTarget::SourceDetails& sourceDetails) override;
 
     //==============================================================================
 
@@ -56,6 +68,8 @@ public:
     float getDecayRate();
     
     float getReleaseRate();
+    
+    void recalculateBounds();
 
     // reposition the ADSR control points based on the widget bounds and ADSR values
     void repositionPoints();
@@ -66,8 +80,6 @@ public:
     void drawGraph (juce::Graphics& g);
     
     void drawPoints (juce::Graphics& g);
-    
-    void drawControlPoint (juce::Graphics& g, const juce::Point<float>& controlPoint);
 
 private:
     
@@ -79,6 +91,7 @@ private:
     int width;
     int height;
     int equalSegmentWidth;
+//    int pointDiameter;
     
     // ADSR parameters ranging [0..1]
     juce::Value attackDurationValue;
@@ -86,8 +99,8 @@ private:
     juce::Value sustainLevelValue;
     juce::Value releaseDurationValue;
     
-    float pointDiameter;
-    int pointFontSize;
+//    float pointDiameter;
+
     
     /*
         Line segment and gradient colors looked up from mockup image
@@ -104,6 +117,7 @@ private:
     juce::Colour gradientEndColour;   // light teal #449C9E rgb(68, 156, 158)
     juce::Colour pointColour;         // royal blue #003AA0 rgb(0, 58, 160)
     juce::Colour controlPointColour;  // magenta #82003D rgb(0, 58, 160)
+    juce::Colour selectedColour;      // grey
     
     juce::ColourGradient gradient;    // light to dark teal
     
@@ -136,16 +150,24 @@ private:
     juce::Rectangle<int> decayRectangle;
     juce::Rectangle<int> sustainRectangle;
     juce::Rectangle<int> releaseRectangle;
+    
+    juce::Rectangle<int> attackDraggableBounds;
+    juce::Rectangle<int> decayDraggableBounds;
+    juce::Rectangle<int> sustainDraggableBounds;
+    juce::Rectangle<int> releaseDraggableBounds;
 
     juce::Path path;
     juce::Path framePath;
     
-    CustomLookAndFeel customLookAndFeel;
+    juce::OwnedArray<DraggablePoint> draggablePoints;
+
+//    CustomLookAndFeel customLookAndFeel;
     
-    juce::Slider attackDurationSlider;
-    juce::Slider decayDurationSlider;
-    juce::Slider sustainLevelSlider;
-    juce::Slider releaseDurationSlider;
+    juce::ComponentBoundsConstrainer constrainer;
+
+    juce::ComponentDragger dragger;
+    
+    juce::Component* draggedComponent = nullptr;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ADSRWidget)
 };
