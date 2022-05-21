@@ -32,10 +32,6 @@ ADSRWidget::ADSRWidget() :
     releaseRatePoint (0.5f, 0.5f),
     releaseControlPoint(),
     releaseEndPoint(),
-    attackRectangle(),
-    decayRectangle(),
-    sustainRectangle(),
-    releaseRectangle(),
     path(),
     framePath()
 {
@@ -79,25 +75,12 @@ void ADSRWidget::paint (juce::Graphics &g)
     g.drawRect (getLocalBounds());
     
     drawGraph (g);
-    
-    g.setColour (juce::Colours::red);
-    g.drawRect (attackRectangle);
-    
-    g.setColour (juce::Colours::blue);
-    g.drawRect (decayRectangle);
-    
-    g.setColour (juce::Colours::yellow);
-    g.drawRect (sustainRectangle);
-    
-    g.setColour (juce::Colours::green);
-    g.drawRect (releaseRectangle);
 }
 
 void ADSRWidget::resized()
 {
     recalculateBounds();
     repositionPoints();
-    resizeSegments();
 
     gradient.clearColours();
 
@@ -147,6 +130,9 @@ void ADSRWidget::mouseDrag (const juce::MouseEvent& mouseEvent)
             auto rightLimitX = decayStartPoint.getX() - OFFSET;
             auto attackY = decayStartPoint.getY() - OFFSET;
             
+            DBG("attackDrag leftLimitX " + juce::String(leftLimitX));
+            DBG("attackDrag rightLimitX " + juce::String(rightLimitX));
+            
             constrainer.applyBoundsToComponent (
                 *draggedComponent,
                 draggedComponent->getBounds().withY (attackY)
@@ -168,13 +154,19 @@ void ADSRWidget::mouseDrag (const juce::MouseEvent& mouseEvent)
                 );
             }
             
-            attackDurationValue = juce::jmap (
+            auto attack = juce::jmap (
                 static_cast<float> (draggedComponent->getBounds().getX()),
                 static_cast<float> (leftLimitX),
                 static_cast<float> (rightLimitX),
                 static_cast<float> (MIN_ADSR_DURATION),
                 static_cast<float> (MAX_ADSR_DURATION)
             );
+            
+            attack = juce::jmin (MAX_ADSR_DURATION, attack);
+            attack = juce::jmax (MIN_ADSR_DURATION, attack);
+            attackDurationValue = attack;
+            
+            DBG("attackDurationValue " + attackDurationValue.getValue().toString());
         }
         else if (draggedComponent == draggablePoints.getUnchecked (1))
         {
@@ -183,6 +175,9 @@ void ADSRWidget::mouseDrag (const juce::MouseEvent& mouseEvent)
             auto leftLimitX = decayStartPoint.getX() - OFFSET;
             auto rightLimitX = sustainStartPoint.getX() - OFFSET;
             auto decayY = sustainStartPoint.getY() - OFFSET;
+            
+            DBG("decayDrag leftLimitX " + juce::String(leftLimitX));
+            DBG("decayDrag rightLimitX " + juce::String(rightLimitX));
 
             constrainer.applyBoundsToComponent (
                 *draggedComponent,
@@ -205,13 +200,19 @@ void ADSRWidget::mouseDrag (const juce::MouseEvent& mouseEvent)
                 );
             }
             
-            decayDurationValue = juce::jmap (
+            auto decay = juce::jmap (
                 static_cast<float> (draggedComponent->getBounds().getX()),
                 static_cast<float> (leftLimitX),
                 static_cast<float> (rightLimitX),
                 static_cast<float> (MIN_ADSR_DURATION),
                 static_cast<float> (MAX_ADSR_DURATION)
             );
+
+            decay = juce::jmin (MAX_ADSR_DURATION, decay);
+            decay = juce::jmax (MIN_ADSR_DURATION, decay);
+            decayDurationValue = decay;
+            
+            DBG("decayDurationValue " + decayDurationValue.getValue().toString());
         }
         else if (draggedComponent == draggablePoints.getUnchecked (2))
         {
@@ -220,6 +221,9 @@ void ADSRWidget::mouseDrag (const juce::MouseEvent& mouseEvent)
             auto topLimitY = topEdgeY - OFFSET;
             auto bottomLimitY = bottomEdgeY - OFFSET;
             auto sustainX = releaseStartPoint.getX() - OFFSET;
+            
+//            DBG("sustainDrag topLimitY " + juce::String(topLimitY));
+//            DBG("sustainDrag bottomLimitY " + juce::String(bottomLimitY));
             
             constrainer.applyBoundsToComponent (
                 *draggedComponent,
@@ -242,13 +246,19 @@ void ADSRWidget::mouseDrag (const juce::MouseEvent& mouseEvent)
                 );
             }
             
-            sustainLevelValue = juce::jmap (
+            auto sustain = juce::jmap (
                 static_cast<float> (draggedComponent->getBounds().getY()),
                 static_cast<float> (topLimitY),
                 static_cast<float> (bottomLimitY),
                 static_cast<float> (MAX_SUSTAIN_LEVEL),
                 static_cast<float> (MIN_SUSTAIN_LEVEL)
             );
+            
+            sustain = juce::jmin (MAX_SUSTAIN_LEVEL, sustain);
+            sustain = juce::jmax (MIN_SUSTAIN_LEVEL, sustain);
+            sustainLevelValue = sustain;
+            
+            DBG("sustainLevelValue " + sustainLevelValue.getValue().toString());
         }
         else if (draggedComponent == draggablePoints.getUnchecked (3))
         {
@@ -257,6 +267,9 @@ void ADSRWidget::mouseDrag (const juce::MouseEvent& mouseEvent)
             auto leftLimitX = releaseStartPoint.getX() - OFFSET;
             auto rightLimitX = releaseEndPoint.getX() - OFFSET;
             auto releaseY = releaseEndPoint.getY() - OFFSET;
+            
+            DBG("releaseDrag leftLimitX " + juce::String(leftLimitX));
+            DBG("releaseDrag rightLimitX " + juce::String(rightLimitX));
             
             constrainer.applyBoundsToComponent (
                 *draggedComponent,
@@ -279,13 +292,19 @@ void ADSRWidget::mouseDrag (const juce::MouseEvent& mouseEvent)
                 );
             }
             
-            releaseDurationValue = juce::jmap (
+            auto release = juce::jmap (
                 static_cast<float> (draggedComponent->getBounds().getX()),
                 static_cast<float> (leftLimitX),
                 static_cast<float> (rightLimitX),
                 static_cast<float> (MIN_ADSR_DURATION),
                 static_cast<float> (MAX_ADSR_DURATION)
             );
+            
+            release = juce::jmin (MAX_ADSR_DURATION, release);
+            release = juce::jmax (MIN_ADSR_DURATION, release);
+            releaseDurationValue = release;
+            
+            DBG("releaseDurationValue: " + releaseDurationValue.getValue().toString());
         }
         
         update();
@@ -312,14 +331,6 @@ void ADSRWidget::recalculateBounds()
     width = bounds.getWidth();
     height = bounds.getHeight();
     equalSegmentWidth = static_cast<float> (width / 4.f);
-    
-    DBG("topEdgeY: " + juce::String (topEdgeY));
-    DBG("bottomEdgeY: " + juce::String (bottomEdgeY));
-    DBG("leftEdgeX: " + juce::String (leftEdgeX));
-    DBG("rightEdgeX: " + juce::String (rightEdgeX));
-    DBG("width: " + juce::String (width));
-    DBG("height: " + juce::String (height));
-    DBG("equalSegmentWidth: " + juce::String (equalSegmentWidth));
 }
 
 void ADSRWidget::repositionPoints()
@@ -332,8 +343,8 @@ void ADSRWidget::repositionPoints()
     // reposition the segment points
     auto attackSegmentWidth = static_cast<float> (equalSegmentWidth * attackDuration);
     auto decaySegmentWidth = static_cast<float> (equalSegmentWidth * decayDuration);
-    auto releaseSegmentWidth = static_cast<float> (equalSegmentWidth * releaseDuration);
     auto sustainSegmentHeight = static_cast<float> (height * sustainLevel);
+    auto releaseSegmentWidth = static_cast<float> (equalSegmentWidth * releaseDuration);
     
     // segment point A
     decayStartPoint.setXY (leftEdgeX + attackSegmentWidth, topEdgeY);
@@ -383,29 +394,6 @@ void ADSRWidget::repositionPoints()
             draggablePoint->setCentrePosition (releaseEndPoint.getX(), releaseEndPoint.getY());
         }
     }
-}
-
-void ADSRWidget::resizeSegments()
-{
-    attackRectangle.setX (leftEdgeX);
-    attackRectangle.setY (topEdgeY);
-    attackRectangle.setWidth (decayStartPoint.getX() - leftEdgeX);
-    attackRectangle.setHeight (bottomEdgeY - decayStartPoint.getY());
-    
-    decayRectangle.setX (decayStartPoint.getX());
-    decayRectangle.setY (topEdgeY);
-    decayRectangle.setWidth (sustainStartPoint.getX() - decayStartPoint.getX());
-    decayRectangle.setHeight (sustainStartPoint.getY() - topEdgeY);
-    
-    sustainRectangle.setX (sustainStartPoint.getX());
-    sustainRectangle.setY (topEdgeY);
-    sustainRectangle.setWidth (equalSegmentWidth);
-    sustainRectangle.setHeight (releaseEndPoint.getY() - topEdgeY);
-    
-    releaseRectangle.setX (releaseStartPoint.getX());
-    releaseRectangle.setY (releaseStartPoint.getY());
-    releaseRectangle.setWidth (releaseEndPoint.getX() - releaseStartPoint.getX());
-    releaseRectangle.setHeight (releaseEndPoint.getY() - releaseStartPoint.getY());
 }
 
 void ADSRWidget::drawGraph (juce::Graphics& g)
@@ -462,6 +450,5 @@ void ADSRWidget::update()
 {
     recalculateBounds();
     repositionPoints();
-    resizeSegments();
     repaint();
 }

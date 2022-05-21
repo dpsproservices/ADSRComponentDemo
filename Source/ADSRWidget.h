@@ -129,11 +129,6 @@ private:
     juce::Point<float> releaseRatePoint;     // release rate XY model
     juce::Point<float> releaseControlPoint;  // release rate draggable graph control point
     juce::Point<float> releaseEndPoint;      // release duration draggable graph control point
-    
-    juce::Rectangle<int> attackRectangle;
-    juce::Rectangle<int> decayRectangle;
-    juce::Rectangle<int> sustainRectangle;
-    juce::Rectangle<int> releaseRectangle;
 
     juce::Path path;
     juce::Path framePath;
