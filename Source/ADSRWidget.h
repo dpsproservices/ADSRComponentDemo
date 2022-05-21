@@ -20,6 +20,9 @@
 #define MAX_SUSTAIN_LEVEL 1.0f
 #define DEFAULT_SUSTAIN_LEVEL 0.5f  // half way some decay, some release
 
+#define MIN_ADSR_RATE_XY 0.1f
+#define MAX_ADSR_RATE_XY 0.9f
+
 #define ADSR_POINT_SIZE 40 // width of the draggable point component
 #define OFFSET 20 // half the width of the draggable point component
 #define ADSR_FONT_SIZE 16
@@ -100,7 +103,7 @@ private:
     juce::Colour gradientMidColour;   // teal 449C9E rgb(68, 156, 158)
     juce::Colour gradientEndColour;   // light teal #449C9E rgb(68, 156, 158)
     juce::Colour pointColour;         // royal blue #003AA0 rgb(0, 58, 160)
-    juce::Colour controlPointColour;  // magenta #82003D rgb(0, 58, 160)
+    juce::Colour controlPointColour;  // magenta #82003D rgb(130, 0, 61)
     juce::Colour selectedColour;      // grey
     
     juce::ColourGradient gradient;    // light to dark teal

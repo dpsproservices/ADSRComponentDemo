@@ -11,24 +11,27 @@ DraggablePoint::DraggablePoint() : isMouseHover (false) { }
 
 void DraggablePoint::paint (juce::Graphics &g)
 {
-    // draw the outer circle to indicate point is selected
-    if (isMouseHover)
+    if (isVisible)
     {
-        g.setOpacity (0.15f);
-        g.setColour (outerFillColour);
-        g.fillEllipse (outerX, outerY, outerWidth, outerWidth);
+        // draw the outer circle to indicate point is selected
+        if (isMouseHover)
+        {
+            g.setOpacity (0.15f);
+            g.setColour (outerFillColour);
+            g.fillEllipse (outerX, outerY, outerWidth, outerWidth);
+        }
+        
+        // draw the inner circle which will be painted inside on top of the outer circle
+        g.setOpacity (0.75f);
+        g.setColour (innerFillColour);
+        g.fillEllipse (innerX, innerY, innerWidth, innerWidth);
+        
+        // draw the label
+        g.setOpacity (1.f);
+        g.setColour (fontColour);
+        g.setFont (fontSize);
+        g.drawText (label, innerX, innerY, innerWidth, innerHeight, juce::Justification::centred);
     }
-    
-    // draw the inner circle which will be painted inside on top of the outer circle
-    g.setOpacity (0.75f);
-    g.setColour (innerFillColour);
-    g.fillEllipse (innerX, innerY, innerWidth, innerWidth);
-    
-    // draw the label
-    g.setOpacity (1.f);
-    g.setColour (fontColour);
-    g.setFont (fontSize);
-    g.drawText (label, innerX, innerY, innerWidth, innerHeight, juce::Justification::centred);
 }
 
 void DraggablePoint::resized()
@@ -50,7 +53,6 @@ void DraggablePoint::resized()
     innerHeight = innerBounds.getHeight();
     
     innerRadius = static_cast<float> (innerWidth / 2.f);
-
 }
 
 //==============================================================================
@@ -78,3 +80,5 @@ void DraggablePoint::setFontColour (const juce::Colour& colour) { fontColour = c
 void DraggablePoint::setOuterFillColour (const juce::Colour& colour) { outerFillColour = colour; }
 
 void DraggablePoint::setInnerFillColour (const juce::Colour& colour) { innerFillColour = colour; }
+
+void DraggablePoint::setVisible ( const bool& visible) { isVisible = visible; }

@@ -37,6 +37,8 @@ public:
     void setOuterFillColour (const juce::Colour& colour);
     
     void setInnerFillColour (const juce::Colour& colour);
+    
+    void setVisible ( const bool& visible);
 
 private:
 
@@ -58,7 +60,7 @@ private:
     
     juce::Colour outerFillColour, innerFillColour;
     
-    bool isMouseHover;
+    bool isMouseHover, isVisible;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DraggablePoint)
 };
