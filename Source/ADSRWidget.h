@@ -71,6 +71,21 @@ public:
 
     // update model and repaint
     void update();
+    
+    // constrain DraggablePoint to horizontal bounds
+    void constrainHorizontal (const int& leftX, const int& rightX, const float& y);
+    
+    // constrain DraggablePoint to vertical bounds
+    void constrainVertical (const int& topY, const int& bottomY, const float& x);
+    
+    // constrain DraggablePoint to rectangle area
+    void constrainArea (const int& leftX, const int& rightX, const int& topY, const int& bottomY);
+    
+    // map the horizontal DraggablePoint X value to duration value
+    float getDuration (const int& leftX, const int& rightX, const float& x);
+    
+    // map the vertical DraggablePoint Y value to sustain level value
+    float getLevel (const int& topY, const int& bottomY, const float& y);
 
 private:
     

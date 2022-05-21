@@ -139,39 +139,11 @@ void ADSRWidget::mouseDrag (const juce::MouseEvent& mouseEvent)
             auto leftLimitX = leftEdgeX - OFFSET;
             auto rightLimitX = decayStartPoint.getX() - OFFSET;
             auto attackY = decayStartPoint.getY() - OFFSET;
+            auto attackX = draggedComponent->getBounds().getX();
             
-            constrainer.applyBoundsToComponent (
-                *draggedComponent,
-                draggedComponent->getBounds().withY (attackY)
-            );
+            constrainHorizontal (leftLimitX, rightLimitX, attackY);
             
-            if (draggedComponent->getBounds().getX() < leftLimitX)
-            {
-                constrainer.applyBoundsToComponent (
-                    *draggedComponent,
-                    draggedComponent->getBounds().withX (leftLimitX).withY (attackY)
-                );
-            }
-            
-            if (draggedComponent->getBounds().getX() > rightLimitX)
-            {
-                constrainer.applyBoundsToComponent (
-                    *draggedComponent,
-                    draggedComponent->getBounds().withX (rightLimitX).withY (attackY)
-                );
-            }
-            
-            auto attack = juce::jmap (
-                static_cast<float> (draggedComponent->getBounds().getX()),
-                static_cast<float> (leftLimitX),
-                static_cast<float> (rightLimitX),
-                static_cast<float> (MIN_ADSR_DURATION),
-                static_cast<float> (MAX_ADSR_DURATION)
-            );
-            
-            attack = juce::jmin (MAX_ADSR_DURATION, attack);
-            attack = juce::jmax (MIN_ADSR_DURATION, attack);
-            attackDurationValue = attack;
+            attackDurationValue = getDuration (leftLimitX, rightLimitX, attackX);
         }
         else if (draggedComponent == draggablePoints.getUnchecked (2))
         {
@@ -179,39 +151,11 @@ void ADSRWidget::mouseDrag (const juce::MouseEvent& mouseEvent)
             auto leftLimitX = decayStartPoint.getX() - OFFSET;
             auto rightLimitX = sustainStartPoint.getX() - OFFSET;
             auto decayY = sustainStartPoint.getY() - OFFSET;
+            auto decayX = draggedComponent->getBounds().getX();
 
-            constrainer.applyBoundsToComponent (
-                *draggedComponent,
-                draggedComponent->getBounds().withY (decayY)
-            );
-            
-            if (draggedComponent->getBounds().getX() < leftLimitX)
-            {
-                constrainer.applyBoundsToComponent (
-                    *draggedComponent,
-                    draggedComponent->getBounds().withX (leftLimitX).withY (decayY)
-                );
-            }
-            
-            if (draggedComponent->getBounds().getX() > rightLimitX)
-            {
-                constrainer.applyBoundsToComponent (
-                    *draggedComponent,
-                    draggedComponent->getBounds().withX (rightLimitX).withY (decayY)
-                );
-            }
-            
-            auto decay = juce::jmap (
-                static_cast<float> (draggedComponent->getBounds().getX()),
-                static_cast<float> (leftLimitX),
-                static_cast<float> (rightLimitX),
-                static_cast<float> (MIN_ADSR_DURATION),
-                static_cast<float> (MAX_ADSR_DURATION)
-            );
+            constrainHorizontal (leftLimitX, rightLimitX, decayY);
 
-            decay = juce::jmin (MAX_ADSR_DURATION, decay);
-            decay = juce::jmax (MIN_ADSR_DURATION, decay);
-            decayDurationValue = decay;
+            decayDurationValue = getDuration (leftLimitX, rightLimitX, decayX);
         }
         else if (draggedComponent == draggablePoints.getUnchecked (4))
         {
@@ -219,39 +163,11 @@ void ADSRWidget::mouseDrag (const juce::MouseEvent& mouseEvent)
             auto topLimitY = topEdgeY - OFFSET;
             auto bottomLimitY = bottomEdgeY - OFFSET;
             auto sustainX = releaseStartPoint.getX() - OFFSET;
+            auto sustainY = draggedComponent->getBounds().getY();
             
-            constrainer.applyBoundsToComponent (
-                *draggedComponent,
-                draggedComponent->getBounds().withX (sustainX)
-            );
+            constrainVertical (topLimitY, bottomLimitY, sustainX);
             
-            if (draggedComponent->getBounds().getY() < topLimitY)
-            {
-                constrainer.applyBoundsToComponent (
-                    *draggedComponent,
-                    draggedComponent->getBounds().withY (topLimitY).withX (sustainX)
-                );
-            }
-            
-            if (draggedComponent->getBounds().getY() > bottomLimitY)
-            {
-                constrainer.applyBoundsToComponent (
-                    *draggedComponent,
-                    draggedComponent->getBounds().withY (bottomLimitY).withX (sustainX)
-                );
-            }
-            
-            auto sustain = juce::jmap (
-                static_cast<float> (draggedComponent->getBounds().getY()),
-                static_cast<float> (topLimitY),
-                static_cast<float> (bottomLimitY),
-                static_cast<float> (MAX_SUSTAIN_LEVEL),
-                static_cast<float> (MIN_SUSTAIN_LEVEL)
-            );
-            
-            sustain = juce::jmin (MAX_SUSTAIN_LEVEL, sustain);
-            sustain = juce::jmax (MIN_SUSTAIN_LEVEL, sustain);
-            sustainLevelValue = sustain;
+            sustainLevelValue = getLevel (topLimitY, bottomLimitY, sustainY);
         }
         else if (draggedComponent == draggablePoints.getUnchecked (6))
         {
@@ -259,39 +175,11 @@ void ADSRWidget::mouseDrag (const juce::MouseEvent& mouseEvent)
             auto leftLimitX = releaseStartPoint.getX() - OFFSET;
             auto rightLimitX = releaseEndPoint.getX() - OFFSET;
             auto releaseY = releaseEndPoint.getY() - OFFSET;
+            auto x = draggedComponent->getBounds().getX();
             
-            constrainer.applyBoundsToComponent (
-                *draggedComponent,
-                draggedComponent->getBounds().withY (releaseY)
-            );
-            
-            if (draggedComponent->getBounds().getX() < leftLimitX)
-            {
-                constrainer.applyBoundsToComponent (
-                    *draggedComponent,
-                    draggedComponent->getBounds().withX (leftLimitX).withY (releaseY)
-                );
-            }
-            
-            if (draggedComponent->getBounds().getX() > rightLimitX)
-            {
-                constrainer.applyBoundsToComponent (
-                    *draggedComponent,
-                    draggedComponent->getBounds().withX (rightLimitX).withY (releaseY)
-                );
-            }
-            
-            auto release = juce::jmap (
-                static_cast<float> (draggedComponent->getBounds().getX()),
-                static_cast<float> (leftLimitX),
-                static_cast<float> (rightLimitX),
-                static_cast<float> (MIN_ADSR_DURATION),
-                static_cast<float> (MAX_ADSR_DURATION)
-            );
-            
-            release = juce::jmin (MAX_ADSR_DURATION, release);
-            release = juce::jmax (MIN_ADSR_DURATION, release);
-            releaseDurationValue = release;
+            constrainHorizontal (leftLimitX, rightLimitX, releaseY);
+
+            releaseDurationValue = getDuration (leftLimitX, rightLimitX, x);
         }
         else if (draggedComponent == draggablePoints.getUnchecked (1))
         {
@@ -300,46 +188,18 @@ void ADSRWidget::mouseDrag (const juce::MouseEvent& mouseEvent)
             auto rightLimitX = decayStartPoint.getX() - ADSR_POINT_SIZE;
             auto topLimitY = topEdgeY;
             auto bottomLimitY = bottomEdgeY - ADSR_POINT_SIZE;
+            auto x = draggedComponent->getBounds().getX();
+            auto y = draggedComponent->getBounds().getY();
             
             DBG("attackRateDrag leftLimitX " + juce::String(leftLimitX));
             DBG("attackRateDrag rightLimitX " + juce::String(rightLimitX));
             DBG("attackRateDrag topLimitY " + juce::String(topLimitY));
             DBG("attackRateDrag bottomLimitY " + juce::String(bottomLimitY));
-                        
-            if (draggedComponent->getBounds().getX() < leftLimitX)
-            {
-                constrainer.applyBoundsToComponent (
-                    *draggedComponent,
-                    draggedComponent->getBounds().withX (leftLimitX)
-                );
-            }
             
-            if (draggedComponent->getBounds().getX() > rightLimitX)
-            {
-                constrainer.applyBoundsToComponent (
-                    *draggedComponent,
-                    draggedComponent->getBounds().withX (rightLimitX)
-                );
-            }
-            
-            if (draggedComponent->getBounds().getY() < topLimitY)
-            {
-                constrainer.applyBoundsToComponent (
-                    *draggedComponent,
-                    draggedComponent->getBounds().withY (topLimitY)
-                );
-            }
-            
-            if (draggedComponent->getBounds().getY() > bottomLimitY)
-            {
-                constrainer.applyBoundsToComponent (
-                    *draggedComponent,
-                    draggedComponent->getBounds().withY (bottomLimitY)
-                );
-            }
+            constrainArea (leftLimitX, rightLimitX, topLimitY, bottomLimitY);
             
             auto rateX = juce::jmap (
-                static_cast<float> (draggedComponent->getBounds().getX()),
+                static_cast<float> (x),
                 static_cast<float> (leftLimitX),
                 static_cast<float> (rightLimitX),
                 static_cast<float> (MIN_ADSR_RATE_XY),
@@ -348,10 +208,9 @@ void ADSRWidget::mouseDrag (const juce::MouseEvent& mouseEvent)
             
             rateX = juce::jmin (MAX_ADSR_RATE_XY, rateX);
             rateX = juce::jmax (MIN_ADSR_RATE_XY, rateX);
-            attackDurationValue = rateX;
 
             auto rateY = juce::jmap (
-                static_cast<float> (draggedComponent->getBounds().getY()),
+                static_cast<float> (y),
                 static_cast<float> (topLimitY),
                 static_cast<float> (bottomLimitY),
                 static_cast<float> (MIN_ADSR_RATE_XY),
@@ -564,4 +423,128 @@ void ADSRWidget::update()
     recalculateBounds();
     repositionPoints();
     repaint();
+}
+
+// constrain DraggablePoint to horizontal bounds
+void ADSRWidget::constrainHorizontal (const int& leftX, const int& rightX, const float& y)
+{
+    if (draggedComponent != nullptr)
+    {
+        constrainer.applyBoundsToComponent (
+            *draggedComponent,
+            draggedComponent->getBounds().withY (y)
+        );
+        
+        if (draggedComponent->getBounds().getX() < leftX)
+        {
+            constrainer.applyBoundsToComponent (
+                *draggedComponent,
+                draggedComponent->getBounds().withX (leftX).withY (y)
+            );
+        }
+        
+        if (draggedComponent->getBounds().getX() > rightX)
+        {
+            constrainer.applyBoundsToComponent (
+                *draggedComponent,
+                draggedComponent->getBounds().withX (rightX).withY (y)
+            );
+        }
+    }
+}
+
+void ADSRWidget::constrainVertical (const int& topY, const int& bottomY, const float& x)
+{
+    if (draggedComponent != nullptr)
+    {
+        constrainer.applyBoundsToComponent (
+            *draggedComponent,
+            draggedComponent->getBounds().withX (x)
+        );
+        
+        if (draggedComponent->getBounds().getY() < topY)
+        {
+            constrainer.applyBoundsToComponent (
+                *draggedComponent,
+                draggedComponent->getBounds().withY (topY).withX (x)
+            );
+        }
+        
+        if (draggedComponent->getBounds().getY() > bottomY)
+        {
+            constrainer.applyBoundsToComponent (
+                *draggedComponent,
+                draggedComponent->getBounds().withY (bottomY).withX (x)
+            );
+        }
+    }
+}
+
+void ADSRWidget::constrainArea (const int& leftX, const int& rightX, const int& topY, const int& bottomY)
+{
+    if (draggedComponent != nullptr)
+    {
+        if (draggedComponent->getBounds().getX() < leftX)
+        {
+            constrainer.applyBoundsToComponent (
+                *draggedComponent,
+                draggedComponent->getBounds().withX (leftX)
+            );
+        }
+        
+        else if (draggedComponent->getBounds().getX() > rightX)
+        {
+            constrainer.applyBoundsToComponent (
+                *draggedComponent,
+                draggedComponent->getBounds().withX (rightX)
+            );
+        }
+        
+        else if (draggedComponent->getBounds().getY() < topY)
+        {
+            constrainer.applyBoundsToComponent (
+                *draggedComponent,
+                draggedComponent->getBounds().withY (topY)
+            );
+        }
+        
+        else if (draggedComponent->getBounds().getY() > bottomY)
+        {
+            constrainer.applyBoundsToComponent (
+                *draggedComponent,
+                draggedComponent->getBounds().withY (bottomY)
+            );
+        }
+    }
+}
+
+float ADSRWidget::getDuration (const int& leftX, const int& rightX, const float& x)
+{
+    float duration = juce::jmap (
+        static_cast<float> (x),
+        static_cast<float> (leftX),
+        static_cast<float> (rightX),
+        static_cast<float> (MIN_ADSR_DURATION),
+        static_cast<float> (MAX_ADSR_DURATION)
+    );
+    
+    duration = juce::jmin (MAX_ADSR_DURATION, duration);
+    duration = juce::jmax (MIN_ADSR_DURATION, duration);
+    
+    return duration;
+}
+
+float ADSRWidget::getLevel (const int& topY, const int& bottomY, const float& y)
+{
+    float level = juce::jmap (
+        static_cast<float> (draggedComponent->getBounds().getY()),
+        static_cast<float> (topY),
+        static_cast<float> (bottomY),
+        static_cast<float> (MAX_SUSTAIN_LEVEL),
+        static_cast<float> (MIN_SUSTAIN_LEVEL)
+    );
+    
+    level = juce::jmin (MAX_SUSTAIN_LEVEL, level);
+    level = juce::jmax (MIN_SUSTAIN_LEVEL, level);
+    return level;
 }
