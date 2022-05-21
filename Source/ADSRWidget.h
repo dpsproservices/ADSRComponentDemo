@@ -23,7 +23,7 @@
 #define DEFAULT_ADSR_POINT_SIZE 40
 #define ADSR_FONT_SIZE 16
 
-class ADSRWidget : public juce::Component //, public juce::DragAndDropContainer
+class ADSRWidget : public juce::Component
 {
 public:
     
@@ -34,24 +34,10 @@ public:
     void resized() override;
     
     //==============================================================================
-    
-//    void mouseEnter (const juce::MouseEvent& mouseEvent) override;
-
-//    void mouseMove (const juce::MouseEvent& mouseEvent) override;
-
-//    void mouseExit (const juce::MouseEvent& mouseEvent) override;
 
     void mouseDown (const juce::MouseEvent& mouseEvent) override;
 
     void mouseDrag (const juce::MouseEvent& mouseEvent) override;
-
-//    void mouseUp (const juce::MouseEvent& mouseEvent) override;
-    
-    //==============================================================================
-    
-//    void dragOperationStarted (const juce::DragAndDropTarget::SourceDetails& sourceDetails) override;
-    
-//    void dragOperationEnded (const juce::DragAndDropTarget::SourceDetails& sourceDetails) override;
 
     //==============================================================================
 
@@ -74,12 +60,13 @@ public:
     // reposition the ADSR control points based on the widget bounds and ADSR values
     void repositionPoints();
     
-    // resize and reposition the ADSR segment recetangles based on the control points
+    // resize and reposition the ADSR segment rectangles based on the control points
     void resizeSegments();
     
     void drawGraph (juce::Graphics& g);
-    
-    void drawPoints (juce::Graphics& g);
+
+    // update model and repaint
+    void update();
 
 private:
     
@@ -91,16 +78,12 @@ private:
     int width;
     int height;
     int equalSegmentWidth;
-//    int pointDiameter;
     
     // ADSR parameters ranging [0..1]
     juce::Value attackDurationValue;
     juce::Value decayDurationValue;
     juce::Value sustainLevelValue;
     juce::Value releaseDurationValue;
-    
-//    float pointDiameter;
-
     
     /*
         Line segment and gradient colors looked up from mockup image
@@ -160,8 +143,6 @@ private:
     juce::Path framePath;
     
     juce::OwnedArray<DraggablePoint> draggablePoints;
-
-//    CustomLookAndFeel customLookAndFeel;
     
     juce::ComponentBoundsConstrainer constrainer;
 

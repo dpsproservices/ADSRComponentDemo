@@ -7,11 +7,7 @@
 
 #include "DraggablePoint.h"
 
-DraggablePoint::DraggablePoint() :
-    isMouseHover (false)
-{
-
-}
+DraggablePoint::DraggablePoint() : isMouseHover (false) { }
 
 void DraggablePoint::paint (juce::Graphics &g)
 {
@@ -59,55 +55,17 @@ void DraggablePoint::resized()
 
 //==============================================================================
 
-//void DraggablePoint::mouseDown (const juce::MouseEvent& mouseEvent)
-//{
-//    componentDragger.startDraggingComponent (this, mouseEvent);
-//    DBG("mouseDown: "
-//        + juce::String (mouseEvent.getScreenX()) + " "
-//        + juce::String (mouseEvent.getScreenY()));
-//}
-
-//void DraggablePoint::mouseDrag (const juce::MouseEvent& mouseEvent)
-//{
-//    componentDragger.dragComponent (this, mouseEvent, nullptr);
-
-//    DBG("mouseDrag: "
-//        + juce::String (mouseEvent.getScreenX()) + " "
-//        + juce::String (mouseEvent.getScreenY()));
-//}
-
 void DraggablePoint::mouseEnter (const juce::MouseEvent& mouseEvent)
 {
-//    DBG("mouseEnter: "
-//        + juce::String (mouseEvent.getScreenX()) + " "
-//        + juce::String (mouseEvent.getScreenY()));
-    
     isMouseHover = true;
     repaint();
 }
 
-//void DraggablePoint::mouseMove (const juce::MouseEvent& mouseEvent)
-//{
-//    DBG("mouseMove: "
-//        + juce::String (mouseEvent.getScreenX()) + " "
-//        + juce::String (mouseEvent.getScreenY()));
-//}
-
 void DraggablePoint::mouseExit (const juce::MouseEvent& mouseEvent)
 {
-//    DBG("mouseExit: "
-//        + juce::String (mouseEvent.getScreenX()) + " "
-//        + juce::String (mouseEvent.getScreenY()));
     isMouseHover = false;
     repaint();
 }
-
-//void DraggablePoint::mouseUp (const juce::MouseEvent& mouseEvent)
-//{
-//    DBG("mouseUp: "
-//        + juce::String (mouseEvent.getScreenX()) + " "
-//        + juce::String (mouseEvent.getScreenY()));
-//}
 
 //==============================================================================
 
