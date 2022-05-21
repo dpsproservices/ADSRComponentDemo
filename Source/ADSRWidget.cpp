@@ -54,7 +54,7 @@ ADSRWidget::ADSRWidget() :
         draggablePoint->setFontSize (ADSR_FONT_SIZE);
         draggablePoint->setInnerFillColour (pointColour);
         draggablePoint->setOuterFillColour (selectedColour);
-        draggablePoint->setSize (DEFAULT_ADSR_POINT_SIZE, DEFAULT_ADSR_POINT_SIZE);
+        draggablePoint->setSize (ADSR_POINT_SIZE, ADSR_POINT_SIZE);
 
         if (i==0) // Attack
         {
@@ -154,16 +154,14 @@ void ADSRWidget::mouseDrag (const juce::MouseEvent& mouseEvent)
     {
         dragger.dragComponent (draggedComponent, mouseEvent, nullptr);
         
-        auto offset = DEFAULT_ADSR_POINT_SIZE / 2;
-        
         if (draggedComponent == draggablePoints.getUnchecked (0))
         {
             // Attack
             DBG("attackDrag");
             
-            auto leftLimitX = leftEdgeX - offset;
-            auto rightLimitX = decayStartPoint.getX() - offset;
-            auto attackY = decayStartPoint.getY() - offset;
+            auto leftLimitX = leftEdgeX - OFFSET;
+            auto rightLimitX = decayStartPoint.getX() - OFFSET;
+            auto attackY = decayStartPoint.getY() - OFFSET;
             
             constrainer.applyBoundsToComponent (
                 *draggedComponent,
@@ -198,9 +196,9 @@ void ADSRWidget::mouseDrag (const juce::MouseEvent& mouseEvent)
         {
             // Decay
             DBG("decayDrag");
-            auto leftLimitX = decayStartPoint.getX() - offset;
-            auto rightLimitX = sustainStartPoint.getX() - offset;
-            auto decayY = sustainStartPoint.getY() - offset;
+            auto leftLimitX = decayStartPoint.getX() - OFFSET;
+            auto rightLimitX = sustainStartPoint.getX() - OFFSET;
+            auto decayY = sustainStartPoint.getY() - OFFSET;
 
             constrainer.applyBoundsToComponent (
                 *draggedComponent,
@@ -235,9 +233,9 @@ void ADSRWidget::mouseDrag (const juce::MouseEvent& mouseEvent)
         {
             // Sustain
             DBG("sustainDrag");
-            auto topLimitY = topEdgeY - offset;
-            auto bottomLimitY = bottomEdgeY - offset;
-            auto sustainX = releaseStartPoint.getX() - offset;
+            auto topLimitY = topEdgeY - OFFSET;
+            auto bottomLimitY = bottomEdgeY - OFFSET;
+            auto sustainX = releaseStartPoint.getX() - OFFSET;
             
             constrainer.applyBoundsToComponent (
                 *draggedComponent,
@@ -264,17 +262,17 @@ void ADSRWidget::mouseDrag (const juce::MouseEvent& mouseEvent)
                 static_cast<float> (draggedComponent->getBounds().getY()),
                 static_cast<float> (topLimitY),
                 static_cast<float> (bottomLimitY),
-                1.f,
-                0.1f
+                static_cast<float> (MAX_SUSTAIN_LEVEL),
+                static_cast<float> (MIN_SUSTAIN_LEVEL)
             );
         }
         else if (draggedComponent == draggablePoints.getUnchecked (3))
         {
             // Release
             DBG("releaseDrag");
-            auto leftLimitX = releaseStartPoint.getX() - offset;
-            auto rightLimitX = releaseEndPoint.getX() - offset;
-            auto releaseY = releaseEndPoint.getY() - offset;
+            auto leftLimitX = releaseStartPoint.getX() - OFFSET;
+            auto rightLimitX = releaseEndPoint.getX() - OFFSET;
+            auto releaseY = releaseEndPoint.getY() - OFFSET;
             
             constrainer.applyBoundsToComponent (
                 *draggedComponent,
@@ -351,13 +349,14 @@ void ADSRWidget::repositionPoints()
     auto attackSegmentWidth = static_cast<float> (equalSegmentWidth * attackDuration);
     auto decaySegmentWidth = static_cast<float> (equalSegmentWidth * decayDuration);
     auto releaseSegmentWidth = static_cast<float> (equalSegmentWidth * releaseDuration);
+    auto sustainSegmentHeight = static_cast<float> (height * sustainLevel);
     
     // segment point A
     decayStartPoint.setXY (leftEdgeX + attackSegmentWidth, topEdgeY);
     
     // segment point D
     auto decayX = decayStartPoint.getX() + decaySegmentWidth;
-    auto decayY = (topEdgeY + height) - static_cast<float> (height * sustainLevel);
+    auto decayY = (topEdgeY + height) - sustainSegmentHeight;
 
     sustainStartPoint.setXY (decayX, decayY);
     
@@ -423,35 +422,33 @@ void ADSRWidget::resizeSegments()
     releaseRectangle.setY (releaseStartPoint.getY());
     releaseRectangle.setWidth (releaseEndPoint.getX() - releaseStartPoint.getX());
     releaseRectangle.setHeight (releaseEndPoint.getY() - releaseStartPoint.getY());
-    
-    auto offset = static_cast<float> (DEFAULT_ADSR_POINT_SIZE / 2.f);
-    
+
     attackDraggableBounds.setBounds (
-        leftEdgeX - offset,
-        topEdgeY - offset,
-        offset + equalSegmentWidth + offset,
-        DEFAULT_ADSR_POINT_SIZE
+        leftEdgeX - OFFSET,
+        topEdgeY - OFFSET,
+        OFFSET + equalSegmentWidth + OFFSET,
+        ADSR_POINT_SIZE
     );
     
     decayDraggableBounds.setBounds (
-        leftEdgeX + equalSegmentWidth - offset,
-        sustainStartPoint.getY() - offset,
-        offset + equalSegmentWidth + offset,
-        DEFAULT_ADSR_POINT_SIZE
+        leftEdgeX + equalSegmentWidth - OFFSET,
+        sustainStartPoint.getY() - OFFSET,
+        OFFSET + equalSegmentWidth + OFFSET,
+        ADSR_POINT_SIZE
     );
     
     sustainDraggableBounds.setBounds (
-        releaseStartPoint.getX() - offset,
-        topEdgeY - offset,
-        DEFAULT_ADSR_POINT_SIZE,
-        offset + height + offset
+        releaseStartPoint.getX() - OFFSET,
+        topEdgeY - OFFSET,
+        ADSR_POINT_SIZE,
+        OFFSET + height + OFFSET
     );
     
     releaseDraggableBounds.setBounds (
-        releaseStartPoint.getX() - offset,
-        releaseEndPoint.getY() - offset,
-        offset + equalSegmentWidth + offset,
-        DEFAULT_ADSR_POINT_SIZE
+        releaseStartPoint.getX() - OFFSET,
+        releaseEndPoint.getY() - OFFSET,
+        OFFSET + equalSegmentWidth + OFFSET,
+        ADSR_POINT_SIZE
     );
 }
 

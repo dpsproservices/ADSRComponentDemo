@@ -20,7 +20,8 @@
 #define MAX_SUSTAIN_LEVEL 1.0f
 #define DEFAULT_SUSTAIN_LEVEL 0.5f  // half way some decay, some release
 
-#define DEFAULT_ADSR_POINT_SIZE 40
+#define ADSR_POINT_SIZE 40 // width of the draggable point component
+#define OFFSET 20 // half the width of the draggable point component
 #define ADSR_FONT_SIZE 16
 
 class ADSRWidget : public juce::Component
