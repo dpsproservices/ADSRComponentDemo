@@ -24,6 +24,7 @@
 #define MAX_ADSR_RATE_XY 0.9f
 
 #define ADSR_POINT_SIZE 40 // width of the draggable point component
+#define CONTROL_POINT_SIZE 30 // width of the draggable control point component
 #define OFFSET 20 // half the width of the draggable point component
 #define ADSR_FONT_SIZE 16
 
