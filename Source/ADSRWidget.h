@@ -20,11 +20,13 @@
 #define MAX_SUSTAIN_LEVEL 1.0f
 #define DEFAULT_SUSTAIN_LEVEL 0.5f  // half way some decay, some release
 
-#define MIN_ADSR_RATE_XY 0.1f
-#define MAX_ADSR_RATE_XY 0.9f
+#define ADSR_RATE_XY_PERCENT 5.f // percent % adjust this to offset the control point boundaries
+#define ADSR_RATE_XY_OFFSET (ADSR_RATE_XY_PERCENT / 100.f)
+#define MIN_ADSR_RATE_XY (ADSR_RATE_XY_OFFSET)
+#define MAX_ADSR_RATE_XY (1.f - MIN_ADSR_RATE_XY)
 
 #define ADSR_POINT_SIZE 40 // width of the draggable point component
-#define CONTROL_POINT_SIZE 30 // width of the draggable control point component
+#define CONTROL_POINT_SIZE 26 // width of the draggable control point component
 #define OFFSET 20 // half the width of the draggable point component
 #define ADSR_FONT_SIZE 16
 
@@ -80,7 +82,17 @@ public:
     void constrainVertical (const int& topY, const int& bottomY, const float& x);
     
     // constrain DraggablePoint to rectangle area
-    void constrainArea (const int& leftX, const int& rightX, const int& topY, const int& bottomY);
+    void constrainArea (
+        const juce::Point<float>& modelPoint,
+        const juce::Rectangle<float>& area,
+        juce::Point<float>& controlPoint
+    );
+    
+    void constrainModel (
+        const juce::Point<float>& draggedPoint,
+        const juce::Rectangle<float>& area,
+        juce::Point<float>& modelPoint
+    );
     
     // map the horizontal DraggablePoint X value to duration value
     float getDuration (const int& leftX, const int& rightX, const float& x);
@@ -148,6 +160,8 @@ private:
     juce::Point<float> releaseRatePoint;     // release rate XY model
     juce::Point<float> releaseControlPoint;  // release rate draggable graph control point
     juce::Point<float> releaseEndPoint;      // release duration draggable graph control point
+    
+    juce::Rectangle<float> attackArea, decayArea, releaseArea;
 
     juce::Path path;
     juce::Path framePath;

@@ -7,18 +7,21 @@
 
 #include "DraggablePoint.h"
 
-DraggablePoint::DraggablePoint() : isMouseHover (false) { }
+DraggablePoint::DraggablePoint() : isMouseHover (false), isDrawGuides (true) { }
 
 void DraggablePoint::paint (juce::Graphics &g)
 {
     if (isVisible)
     {
         // draw the outer circle to indicate point is selected
-        if (isMouseHover)
+        if (isDrawGuides)
         {
-            g.setOpacity (0.15f);
-            g.setColour (outerFillColour);
-            g.fillEllipse (outerX, outerY, outerWidth, outerWidth);
+            if (isMouseHover)
+            {
+                g.setOpacity (0.15f);
+                g.setColour (outerFillColour);
+                g.fillEllipse (outerX, outerY, outerWidth, outerWidth);
+            }
         }
         
         // draw the inner circle which will be painted inside on top of the outer circle
@@ -82,3 +85,5 @@ void DraggablePoint::setOuterFillColour (const juce::Colour& colour) { outerFill
 void DraggablePoint::setInnerFillColour (const juce::Colour& colour) { innerFillColour = colour; }
 
 void DraggablePoint::setVisible ( const bool& visible) { isVisible = visible; }
+
+void DraggablePoint::setDrawGuides ( const bool& drawGuides) { isDrawGuides = drawGuides; }

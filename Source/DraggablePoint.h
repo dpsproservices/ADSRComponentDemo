@@ -39,6 +39,12 @@ public:
     void setInnerFillColour (const juce::Colour& colour);
     
     void setVisible ( const bool& visible);
+    
+    void setDrawGuides ( const bool& isDrawGuides);
+    
+    //==============================================================================
+    
+    juce::Point<float> modelPoint, centerPoint;
 
 private:
 
@@ -50,17 +56,11 @@ private:
     
     int innerX, innerY, innerWidth, innerHeight;
     
-    int outerRadius, innerRadius;
+    int outerRadius, innerRadius, fontSize;
     
-    juce::Point<float> centerPoint;
+    bool isMouseHover, isVisible, isDrawGuides;
     
-    int fontSize;
-    
-    juce::Colour fontColour;
-    
-    juce::Colour outerFillColour, innerFillColour;
-    
-    bool isMouseHover, isVisible;
-    
+    juce::Colour outerFillColour, innerFillColour, fontColour;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DraggablePoint)
 };
