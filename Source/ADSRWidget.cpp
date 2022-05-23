@@ -32,7 +32,9 @@ ADSRWidget::ADSRWidget() :
     decayPoint(),
     sustainPoint(),
     releasePoint(),
-    attackArea(), decayArea(), releaseArea(),
+    attackArea(),
+    decayArea(),
+    releaseArea(),
     path(),
     framePath()
 {
@@ -234,7 +236,7 @@ void ADSRWidget::repositionPoints()
     // reposition the segment points
     auto attackSegmentWidth = static_cast<float> (equalSegmentWidth * attackDuration);
     auto decaySegmentWidth = static_cast<float> (equalSegmentWidth * decayDuration);
-    //auto sustainSegmentWidth = static_cast<float> (equalSegmentWidth);
+
     auto releaseSegmentWidth = static_cast<float> (equalSegmentWidth * releaseDuration);
     
     auto attackSegmentHeight = static_cast<float> (height);
@@ -309,6 +311,8 @@ void ADSRWidget::repositionPoints()
 void ADSRWidget::drawGraph (juce::Graphics& g)
 {
     path.clear();
+    
+    juce::Point<float> startPoint (leftEdgeX, bottomEdgeY);
 
     // start path at bottom left corner
     path.startNewSubPath (leftEdgeX, bottomEdgeY);
