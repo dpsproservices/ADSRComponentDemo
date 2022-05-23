@@ -147,19 +147,21 @@ private:
         the control point will disappear on mouse up off the segment area
      
         model control points bound inside the segment area rectangle
-        with XY coordinates ranging { [0.f ... 0.9f] , [0.f ... 0.9f] }
+        with XY coordinates
     */
 
-    juce::Point<float> attackRatePoint;      // attack rate XY model
+    juce::Point<float> attackModelPoint;     // attack rate XY model
+    juce::Point<float> decayModelPoint;      // decay rate XY model
+    juce::Point<float> releaseModelPoint;    // release rate XY model
+    
     juce::Point<float> attackControlPoint;   // attack rate draggable graph control point
-    juce::Point<float> decayStartPoint;      // decay starts where attack ends
-    juce::Point<float> decayRatePoint;       // decay rate XY model
     juce::Point<float> decayControlPoint;    // decay rate draggable graph control point
-    juce::Point<float> sustainStartPoint;    // sustain starts where decay ends, vertically draggable to adjust sustain level
-    juce::Point<float> releaseStartPoint;    // release starts where sustain ends, also vertically draggable to adjust sustain level
-    juce::Point<float> releaseRatePoint;     // release rate XY model
     juce::Point<float> releaseControlPoint;  // release rate draggable graph control point
-    juce::Point<float> releaseEndPoint;      // release duration draggable graph control point
+    
+    juce::Point<float> attackPoint;     // horizontal drag to adjust attack duration
+    juce::Point<float> decayPoint;      // horizontal drag to adjust decay duration
+    juce::Point<float> sustainPoint;    // drag to adjust sustain level
+    juce::Point<float> releasePoint;    // horizontal drag to adjust release duration
     
     juce::Rectangle<float> attackArea, decayArea, releaseArea;
 
