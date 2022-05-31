@@ -8,27 +8,11 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
+#include "Constants.h"
 #include "CustomLookAndFeel.h"
 #include "DraggablePoint.h"
-
-#define PADDING 40
-
-#define MIN_ADSR_DURATION 0.1f
-#define MAX_ADSR_DURATION 1.0f
-
-#define MIN_SUSTAIN_LEVEL 0.0f
-#define MAX_SUSTAIN_LEVEL 1.0f
-#define DEFAULT_SUSTAIN_LEVEL 0.5f  // half way some decay, some release
-
-#define ADSR_RATE_XY_PERCENT 5.f // percent % adjust this to offset the control point boundaries
-#define ADSR_RATE_XY_OFFSET (ADSR_RATE_XY_PERCENT / 100.f)
-#define MIN_ADSR_RATE_XY (ADSR_RATE_XY_OFFSET)
-#define MAX_ADSR_RATE_XY (1.f - MIN_ADSR_RATE_XY)
-
-#define ADSR_POINT_SIZE 40 // width of the draggable point component
-#define CONTROL_POINT_SIZE 26 // width of the draggable control point component
-#define OFFSET 20 // half the width of the draggable point component
-#define ADSR_FONT_SIZE 16
+#include "ValuePoint.h"
+#include "ADSRModel.h"
 
 class ADSRWidget : public juce::Component
 {
@@ -56,11 +40,11 @@ public:
     
     float getReleaseDuration();
     
-    float getAttackRate();
+    const ValuePoint<float>& getAttackRate();
 
-    float getDecayRate();
+    const ValuePoint<float>& getDecayRate();
     
-    float getReleaseRate();
+    const ValuePoint<float>& getReleaseRate();
     
     void recalculateBounds();
 
@@ -70,37 +54,29 @@ public:
     // resize and reposition the ADSR segment rectangles based on the control points
     void resizeSegments();
     
+    // draw the ADSR envelope path filled with a gradient
     void drawGraph (juce::Graphics& g);
 
     // update model and repaint
     void update();
     
-    // constrain DraggablePoint to horizontal bounds
-    void constrainHorizontal (const int& leftX, const int& rightX, const float& y);
-    
-    // constrain DraggablePoint to vertical bounds
-    void constrainVertical (const int& topY, const int& bottomY, const float& x);
-    
-    // constrain DraggablePoint to rectangle area
-    void constrainArea (
-        const juce::Point<float>& modelPoint,
+    void constrainPointToArea (
+        const juce::Point<float>& draggedPoint,
         const juce::Rectangle<float>& area,
         juce::Point<float>& controlPoint
     );
     
-    void constrainModel (
-        const juce::Point<float>& draggedPoint,
+    void constrainPointToModel (
+        const ValuePoint<float>& modelPoint, // center of the model point
+        const float& modelLimitMin,
+        const float& modelLimitMax,
         const juce::Rectangle<float>& area,
-        juce::Point<float>& modelPoint
+        juce::Point<float>& controlPoint
     );
-    
-    // map the horizontal DraggablePoint X value to duration value
-    float getDuration (const int& leftX, const int& rightX, const float& x);
-    
-    // map the vertical DraggablePoint Y value to sustain level value
-    float getLevel (const int& topY, const int& bottomY, const float& y);
 
 private:
+    
+    ADSRModel model; // limits and parameters defaults initialized from Constants.h
     
     juce::Rectangle<int> bounds;
     int topEdgeY;
@@ -110,13 +86,7 @@ private:
     int width;
     int height;
     int equalSegmentWidth;
-    
-    // ADSR parameters ranging [0..1]
-    juce::Value attackDurationValue;
-    juce::Value decayDurationValue;
-    juce::Value sustainLevelValue;
-    juce::Value releaseDurationValue;
-    
+
     /*
         Line segment and gradient colors looked up from mockup image
      
@@ -149,28 +119,29 @@ private:
         model control points bound inside the segment area rectangle
         with XY coordinates
     */
+    
+    juce::Point<float> attackRatePoint;         // attack rate draggable graph control point
+    juce::Point<float> decayRatePoint;          // decay rate draggable graph control point
+    juce::Point<float> releaseRatePoint;        // release rate draggable graph control point
+    
+    juce::Point<float> attackDurationPoint;     // horizontal drag to adjust attack duration
+    juce::Point<float> decayDurationPoint;      // horizontal drag to adjust decay duration
+    juce::Point<float> sustainLevelPoint;       // drag to adjust sustain level
+    juce::Point<float> releaseDurationPoint;    // horizontal drag to adjust release duration
+    
+    juce::Rectangle<float> attackRateArea;      // attack rate drag point bounds
+    juce::Rectangle<float> decayRateArea;       // decay rate drag point bounds
+    juce::Rectangle<float> releaseRateArea;     // release rate drag point bounds
+    
+    juce::Rectangle<float> attackDurationArea;  // attack duration drag point bounds
+    juce::Rectangle<float> decayDurationArea;   // decay duration drag point bounds
+    juce::Rectangle<float> sustainLevelArea;    // sustain level drag point bounds
+    juce::Rectangle<float> releaseDurationArea; // release duration drag point bounds
 
-    juce::Point<float> attackModelPoint;     // attack rate XY model
-    juce::Point<float> decayModelPoint;      // decay rate XY model
-    juce::Point<float> releaseModelPoint;    // release rate XY model
-    
-    juce::Point<float> attackControlPoint;   // attack rate draggable graph control point
-    juce::Point<float> decayControlPoint;    // decay rate draggable graph control point
-    juce::Point<float> releaseControlPoint;  // release rate draggable graph control point
-    
-    juce::Point<float> attackPoint;     // horizontal drag to adjust attack duration
-    juce::Point<float> decayPoint;      // horizontal drag to adjust decay duration
-    juce::Point<float> sustainPoint;    // drag to adjust sustain level
-    juce::Point<float> releasePoint;    // horizontal drag to adjust release duration
-    
-    juce::Rectangle<float> attackArea, decayArea, releaseArea;
-
-    juce::Path path;
-    juce::Path framePath;
+    juce::Path graphPath;   // graphed ADSR segments filled with vertical gradient
+    juce::Path framePath;   // frame border bottom edge of the graph
     
     juce::OwnedArray<DraggablePoint> draggablePoints;
-    
-    juce::ComponentBoundsConstrainer constrainer;
 
     juce::ComponentDragger dragger;
     
