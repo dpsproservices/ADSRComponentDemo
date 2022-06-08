@@ -47,6 +47,14 @@ public:
     const ValuePoint<float>& getReleaseRate();
     
     void recalculateBounds();
+    
+    void repositionAttack();
+    
+    void repositionDecay();
+    
+    void repositionSustain();
+    
+    void repositionRelease();
 
     // reposition the ADSR control points based on the widget bounds and ADSR values
     void repositionPoints();
@@ -65,7 +73,7 @@ public:
         const juce::Rectangle<float>& area,
         juce::Point<float>& controlPoint
     );
-    
+
     void constrainPointToModel (
         const ValuePoint<float>& modelPoint, // center of the model point
         const float& modelLimitMin,

@@ -91,22 +91,23 @@ public:
 
     void setAttackDuration (const float& attackDuration)
     {
-        attackDurationValue = attackDuration;
+        
+        attackDurationValue = juce::jlimit (minAttackDuration, maxAttackDuration, attackDuration);
     }
     
     void setDecayDuration (const float& decayDuration)
     {
-        decayDurationValue = decayDuration;
+        decayDurationValue = juce::jlimit (minDecayDuration, maxDecayDuration, decayDuration);
     }
     
     void setSustainLevel (const float& sustainLevel)
     {
-        sustainLevelValue = sustainLevel;
+        sustainLevelValue = juce::jlimit (minSustainLevel, maxSustainLevel, sustainLevel);
     }
     
     void setReleaseDuration (const float& releaseDuration)
     {
-        releaseDurationValue = releaseDuration;
+        releaseDurationValue = juce::jlimit (minReleaseDuration, maxReleaseDuration, releaseDuration);
     }
     
     //==============================================================================
@@ -145,17 +146,26 @@ public:
     
     void setAttackRate (const float& x, const float& y)
     {
-        attackRateValuePoint.setXY (x,y);
+        attackRateValuePoint.setXY (
+            juce::jlimit (minAttackRate, maxAttackRate, x),
+            juce::jlimit (minAttackRate, maxAttackRate, y)
+        );
     }
     
     void setDecayRate (const float& x, const float& y)
     {
-        decayRateValuePoint.setXY (x,y);
+        decayRateValuePoint.setXY (
+           juce::jlimit (minDecayRate, maxDecayRate, x),
+           juce::jlimit (minDecayRate, maxDecayRate, y)
+       );
     }
     
     void setReleaseRate (const float& x, const float& y)
     {
-        releaseRateValuePoint.setXY (x,y);
+        releaseRateValuePoint.setXY (
+            juce::jlimit (minReleaseRate, maxReleaseRate, x),
+            juce::jlimit (minReleaseRate, maxReleaseRate, y)
+        );
     }
     
     //==============================================================================

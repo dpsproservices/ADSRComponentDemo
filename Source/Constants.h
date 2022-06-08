@@ -26,7 +26,7 @@
 
 // To avoid overlapping ADSR draggable points with the rate curve control points
 // Reduce the bounds of the rectangle areas constraining each of the A, D, R rate curve points
-#define RATE_BOUNDS_PERCENT_REDUCE 5.f    // percentage to reduce bounds constraining rate curve points
+#define RATE_BOUNDS_PERCENT_REDUCE 1.f    // percentage to reduce bounds constraining rate curve points
 #define RATE_OFFSET (RATE_BOUNDS_PERCENT_REDUCE / 100.f)    // do not modify
 #define MIN_RATE (RATE_OFFSET)                              // do not modify
 #define MAX_RATE (1.f - MIN_RATE)                           // do not modify
