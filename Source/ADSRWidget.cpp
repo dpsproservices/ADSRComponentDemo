@@ -170,6 +170,7 @@ void ADSRWidget::mouseDrag (const juce::MouseEvent& mouseEvent)
         {
             constrainPointToArea (draggedComponent->getBounds().getCentre().toFloat(), sustainLevelArea, sustainLevelPoint);
             
+            // top is max sustain bottom is min sustain
             auto sustain = juce::jmap (
                 sustainLevelPoint.getY(),
                 sustainLevelArea.getY(),
@@ -210,8 +211,8 @@ void ADSRWidget::mouseDrag (const juce::MouseEvent& mouseEvent)
 
             auto y = juce::jmap (
                 attackRatePoint.getY(),
-                attackRateArea.getBottom() - OFFSET,
                 attackRateArea.getY() + OFFSET,
+                attackRateArea.getBottom() - OFFSET,
                 MIN_RATE,
                 MAX_RATE
             );
@@ -233,8 +234,8 @@ void ADSRWidget::mouseDrag (const juce::MouseEvent& mouseEvent)
 
             auto y = juce::jmap (
                 decayRatePoint.getY(),
-                decayRateArea.getBottom() - OFFSET,
                 decayRateArea.getY() + OFFSET,
+                decayRateArea.getBottom() - OFFSET,
                 MIN_RATE,
                 MAX_RATE
             );
@@ -256,8 +257,8 @@ void ADSRWidget::mouseDrag (const juce::MouseEvent& mouseEvent)
 
             auto y = juce::jmap (
                 releaseRatePoint.getY(),
-                releaseRateArea.getBottom() - OFFSET,
                 releaseRateArea.getY() + OFFSET,
+                releaseRateArea.getBottom() - OFFSET,
                 MIN_RATE,
                 MAX_RATE
             );
@@ -313,7 +314,13 @@ void ADSRWidget::repositionAttack()
     // segment point A
     attackDurationPoint.setXY (leftEdgeX + attackSegmentWidth, topEdgeY);
     
-    attackRateArea.setBounds (leftEdgeX + OFFSET, topEdgeY + OFFSET, attackSegmentWidth - POINT_SIZE, attackSegmentHeight - POINT_SIZE);
+    auto attackRateAreaWidth = attackSegmentWidth - POINT_SIZE;
+    attackRateAreaWidth = juce::jmax (static_cast<float> (POINT_SIZE), attackRateAreaWidth);
+    
+    auto attackRateAreaHeight = attackSegmentHeight - POINT_SIZE;
+    attackRateAreaHeight = juce::jmax (static_cast<float> (POINT_SIZE), attackRateAreaHeight);
+    
+    attackRateArea.setBounds (leftEdgeX + OFFSET, topEdgeY + OFFSET, attackRateAreaWidth, attackRateAreaHeight);
     
     attackDurationArea.setBounds (leftEdgeX + OFFSET, topEdgeY - OFFSET, equalSegmentWidth, POINT_SIZE);
     
@@ -323,25 +330,10 @@ void ADSRWidget::repositionAttack()
 void ADSRWidget::repositionDecay()
 {
     auto sustainLevel = getSustainLevel();
+    auto sustainSegmentHeight = static_cast<float> (height * sustainLevel);
 
-    if ( sustainLevel == MAX_SUSTAIN_LEVEL )
+    if (sustainLevel >= MIN_SUSTAIN_LEVEL && sustainLevel < MAX_SUSTAIN_LEVEL)
     {
-        // segment point D
-        auto decayX = attackDurationPoint.getX();
-        auto decayY = topEdgeY;
-        
-        decayDurationPoint.setXY (decayX, decayY);
-
-        decayRateArea.setBounds (decayX, decayY, 1, 1);
-        
-        // Horizontal draggable areas are limited to height of the control point
-        decayDurationArea.setBounds (decayX, decayY, 1, 1);
-        
-        decayRatePoint.setXY (MIN_RATE, MIN_RATE);
-    }
-    else if ( sustainLevel >= MIN_SUSTAIN_LEVEL && sustainLevel < MAX_SUSTAIN_LEVEL)
-    {
-        auto sustainSegmentHeight = static_cast<float> (height * sustainLevel);
         auto decayDuration = getDecayDuration();
         auto decayRate = getDecayRate();
         
@@ -352,16 +344,67 @@ void ADSRWidget::repositionDecay()
         auto decayX = attackDurationPoint.getX() + decaySegmentWidth;
         auto decayY = (topEdgeY + height) - sustainSegmentHeight;
         auto decaySegmentHeight = static_cast<float> (decayY - topEdgeY);
+
+        auto decayRateAreaWidth = decaySegmentWidth - POINT_SIZE;
+        decayRateAreaWidth = juce::jmax (static_cast<float> (POINT_SIZE), decayRateAreaWidth);
         
+        auto decayRateAreaHeight = decaySegmentHeight - POINT_SIZE;
+        decayRateAreaHeight = juce::jmax (static_cast<float> (POINT_SIZE), decayRateAreaHeight);
+        
+        auto decayRateAreaX = attackDurationPoint.getX() + OFFSET;
+        auto decayRateAreaY = attackDurationPoint.getY() + OFFSET;
+        
+        if (sustainLevel > DEFAULT_SUSTAIN_LEVEL)
+        {
+            if (decayDurationArea.getY() <= decayRateAreaY)
+            {
+                decayRateAreaY = decayDurationArea.getY();
+            }
+        }
+
         decayDurationPoint.setXY (decayX, decayY);
         
         // 2D area for the Decay Rate curve
-        decayRateArea.setBounds (attackDurationPoint.getX() + OFFSET, attackDurationPoint.getY() + OFFSET, decaySegmentWidth - POINT_SIZE, decaySegmentHeight - POINT_SIZE);
+        decayRateArea.setBounds (decayRateAreaX, decayRateAreaY, decayRateAreaWidth, decayRateAreaHeight);
         
         // Horizontal draggable areas are limited to height of the control point
         decayDurationArea.setBounds (attackDurationPoint.getX() + OFFSET, decayDurationPoint.getY() - OFFSET, equalSegmentWidth, POINT_SIZE);
         
         constrainPointToModel (decayRate, MIN_RATE, MAX_RATE, decayRateArea, decayRatePoint);
+        
+        if (sustainLevel > DEFAULT_SUSTAIN_LEVEL)
+        {
+            if (decayY <= decayRatePoint.getY())
+            {
+                decayRatePoint.setY (decayY);
+            }
+            
+            if (decayRatePoint.getY() <= attackDurationPoint.getY())
+            {
+                decayRatePoint.setY (attackDurationPoint.getY());
+            }
+        }
+        
+        if (decayRatePoint.getX() >= decayDurationPoint.getX())
+        {
+            decayRatePoint.setX (decayDurationPoint.getX());
+        }
+        
+    }
+    else if (sustainLevel == MAX_SUSTAIN_LEVEL)
+    {
+        // segment point D
+        auto decayX = attackDurationPoint.getX();
+        auto decayY = topEdgeY;
+        
+        decayDurationPoint.setXY (decayX, decayY);
+
+        //decayRateArea.setBounds (decayX, decayY, 1, 1);
+        
+        // Horizontal draggable areas are limited to height of the control point
+        //decayDurationArea.setBounds (decayX, decayY, 1, 1);
+        
+        //decayRatePoint.setXY (MIN_RATE, MIN_RATE);
     }
 }
 
@@ -375,7 +418,7 @@ void ADSRWidget::repositionSustain()
         // point D not shown
         sustainLevelPoint.setXY (attackDurationPoint.getX() + equalSegmentWidth, attackDurationPoint.getY());
     }
-    else if ( sustainLevel >= MIN_SUSTAIN_LEVEL && sustainLevel < MAX_SUSTAIN_LEVEL)
+    else if (sustainLevel >= MIN_SUSTAIN_LEVEL && sustainLevel < MAX_SUSTAIN_LEVEL)
     {
         // segment point S inline with segment point D
         sustainLevelPoint.setXY (decayDurationPoint.getX() + equalSegmentWidth, decayDurationPoint.getY());
@@ -390,18 +433,9 @@ void ADSRWidget::repositionRelease()
     auto sustainLevel = getSustainLevel();
     
     // do not show the Release segment if the Sustain level is at its minimum
-    if ( sustainLevel == MIN_SUSTAIN_LEVEL )
+    if (sustainLevel > MIN_SUSTAIN_LEVEL && sustainLevel <= MAX_SUSTAIN_LEVEL)
     {
-        releaseDurationPoint.setXY (sustainLevelPoint.getX(), bottomEdgeY);
         
-        releaseDurationArea.setBounds (releaseDurationPoint.getX(), releaseDurationPoint.getY(), 1, 1);
-        
-        releaseRateArea.setBounds (sustainLevelPoint.getX(), sustainLevelPoint.getY(), 1, 1);
-        
-        releaseRatePoint.setXY (MIN_RATE, MAX_RATE);
-    }
-    else if ( sustainLevel > MIN_SUSTAIN_LEVEL && sustainLevel <= MAX_SUSTAIN_LEVEL )
-    {
         auto releaseDuration = getReleaseDuration();
         auto releaseRate = getReleaseRate();
         
@@ -413,12 +447,35 @@ void ADSRWidget::repositionRelease()
         
         auto releaseSegmentHeight = static_cast<float> (releaseDurationPoint.getY() - sustainLevelPoint.getY());
         
+        auto releaseRateAreaWidth = releaseSegmentWidth - POINT_SIZE;
+        releaseRateAreaWidth = juce::jmax (static_cast<float> (POINT_SIZE), releaseRateAreaWidth);
+        
+        auto releserRateAreaHeight = releaseSegmentHeight - POINT_SIZE;
+        releserRateAreaHeight = juce::jmax (static_cast<float> (POINT_SIZE), releserRateAreaHeight);
+        
+        auto releaseRateAreaY = sustainLevelPoint.getY() + OFFSET;
+        
+        if (releaseRateAreaY >= releaseDurationArea.getY() && (sustainLevel < DEFAULT_SUSTAIN_LEVEL))
+        {
+            releaseRateAreaY = releaseDurationArea.getY();
+        }
+        
         // Horizontal draggable areas are limited to height of the control point
         releaseDurationArea.setBounds (sustainLevelPoint.getX() + OFFSET, releaseDurationPoint.getY() - OFFSET, equalSegmentWidth, POINT_SIZE);
         
-        releaseRateArea.setBounds (sustainLevelPoint.getX() + OFFSET, sustainLevelPoint.getY() + OFFSET, releaseSegmentWidth - POINT_SIZE, releaseSegmentHeight - POINT_SIZE);
+        releaseRateArea.setBounds (sustainLevelPoint.getX() + OFFSET, releaseRateAreaY, releaseRateAreaWidth, releserRateAreaHeight);
         
         constrainPointToModel (releaseRate, MIN_RATE, MAX_RATE, releaseRateArea, releaseRatePoint);
+    }
+    else if (sustainLevel == MIN_SUSTAIN_LEVEL)
+    {
+        //releaseDurationPoint.setXY (sustainLevelPoint.getX(), bottomEdgeY);
+        
+        //releaseDurationArea.setBounds (releaseDurationPoint.getX(), releaseDurationPoint.getY(), 1, 1);
+        
+        //releaseRateArea.setBounds (sustainLevelPoint.getX(), sustainLevelPoint.getY(), 1, 1);
+        
+        //releaseRatePoint.setXY (MIN_RATE, MAX_RATE);
     }
 }
 
@@ -431,7 +488,9 @@ void ADSRWidget::repositionPoints()
     repositionDecay();
     repositionSustain();
     repositionRelease();
-
+    
+    auto sustainLevel = getSustainLevel();
+    
     // reposition the centers of the draggable points based on the control points
     for ( int i = 0; i < 7; ++i )
     {
@@ -447,10 +506,12 @@ void ADSRWidget::repositionPoints()
         else if (i==2) // Decay
         {
             draggablePoint->setCentrePosition (decayDurationPoint.getX(), decayDurationPoint.getY());
+            draggablePoint->setVisible (sustainLevel < MAX_SUSTAIN_LEVEL);
         }
         else if (i==3) // Decay rate control point
         {
             draggablePoint->setCentrePosition (decayRatePoint.getX(), decayRatePoint.getY());
+            draggablePoint->setVisible (sustainLevel < MAX_SUSTAIN_LEVEL);
         }
         else if (i==4) // Sustain
         {
@@ -459,10 +520,12 @@ void ADSRWidget::repositionPoints()
         else if (i==5) // Release rate control point
         {
             draggablePoint->setCentrePosition (releaseRatePoint.getX(), releaseRatePoint.getY());
+            draggablePoint->setVisible (sustainLevel > MIN_SUSTAIN_LEVEL);
         }
         else if (i==6) // Release
         {
             draggablePoint->setCentrePosition (releaseDurationPoint.getX(), releaseDurationPoint.getY());
+            draggablePoint->setVisible (sustainLevel > MIN_SUSTAIN_LEVEL);
         }
     }
 }
@@ -476,7 +539,7 @@ void ADSRWidget::drawGraph (juce::Graphics& g)
     
     auto sustainLevel = getSustainLevel();
     
-    if ( sustainLevel >= MIN_SUSTAIN_LEVEL && sustainLevel <= MAX_SUSTAIN_LEVEL )
+    if (sustainLevel > MIN_SUSTAIN_LEVEL && sustainLevel < MAX_SUSTAIN_LEVEL)
     {
         // show all 4 segments Attack, Decay, Sustain, Release
         
@@ -492,7 +555,7 @@ void ADSRWidget::drawGraph (juce::Graphics& g)
         // from Release start point bezier curve through Release control point to Release end point
         graphPath.quadraticTo (releaseRatePoint, releaseDurationPoint);
     }
-    else if ( sustainLevel == MIN_SUSTAIN_LEVEL )
+    else if (sustainLevel == MIN_SUSTAIN_LEVEL)
     {
         // dont show the Sustain or Release segments only Attack and Decay
         
@@ -502,7 +565,7 @@ void ADSRWidget::drawGraph (juce::Graphics& g)
         // from Decay start point bezier curve through Decay control point to Sustain start point
         graphPath.quadraticTo (decayRatePoint, decayDurationPoint);
     }
-    else if ( sustainLevel == MAX_SUSTAIN_LEVEL )
+    else if (sustainLevel == MAX_SUSTAIN_LEVEL)
     {
         // dont show the Decay segment only Attack, Sustain, Release
         
@@ -545,10 +608,9 @@ void ADSRWidget::drawGraph (juce::Graphics& g)
     
     g.setColour (juce::Colours::green);
 
-    if ( sustainLevel >= MIN_SUSTAIN_LEVEL && sustainLevel <= MAX_SUSTAIN_LEVEL )
+    if (sustainLevel > MIN_SUSTAIN_LEVEL && sustainLevel < MAX_SUSTAIN_LEVEL)
     {
         // show all 4 segments Attack, Decay, Sustain, Release
-        
         g.drawRect (attackRateArea);
         g.drawRect (attackDurationArea);
         g.drawRect (decayDurationArea);
@@ -557,19 +619,18 @@ void ADSRWidget::drawGraph (juce::Graphics& g)
         g.drawRect (releaseDurationArea);
         g.drawRect (releaseRateArea);
     }
-    else if ( sustainLevel == MIN_SUSTAIN_LEVEL )
+    else if (sustainLevel == MIN_SUSTAIN_LEVEL)
     {
         // dont show the Sustain or Release segments only Attack and Decay
-        
         g.drawRect (attackRateArea);
         g.drawRect (attackDurationArea);
+        g.drawRect (sustainLevelArea);
         g.drawRect (decayDurationArea);
         g.drawRect (decayRateArea);
     }
-    else if ( sustainLevel == MAX_SUSTAIN_LEVEL )
+    else if (sustainLevel == MAX_SUSTAIN_LEVEL)
     {
         // dont show the Decay segment only Attack, Sustain, Release
-        
         g.drawRect (attackRateArea);
         g.drawRect (attackDurationArea);
         g.drawRect (sustainLevelArea);
@@ -604,6 +665,8 @@ void ADSRWidget::constrainPointToModel (
     juce::Point<float>& controlPoint
 )
 {
+    // top left corner of area is min
+    // bottom right corner max
     auto minX = area.getX();
     auto maxX = area.getRight();
     auto minY = area.getY();
@@ -621,8 +684,8 @@ void ADSRWidget::constrainPointToModel (
          modelPoint.getY(),
          modelLimitMin,
          modelLimitMax,
-         maxY,
-         minY
+         minY,
+         maxY
     );
     
     x = juce::jlimit (minX, maxX, x);

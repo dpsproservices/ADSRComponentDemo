@@ -214,7 +214,7 @@ public:
     
     /*
      
-     Digital Envelop Generators chapter 6.5 page 286
+     Digital Envelope Generators chapter 6.5 page 286
      
      Curve equations for Attack, Decay, Release rates
      
