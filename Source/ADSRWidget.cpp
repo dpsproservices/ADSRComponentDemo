@@ -324,6 +324,11 @@ void ADSRWidget::repositionAttack()
     
     attackDurationArea.setBounds (leftEdgeX + OFFSET, topEdgeY - OFFSET, equalSegmentWidth, POINT_SIZE);
     
+    if (attackRatePoint.getX() >= attackDurationPoint.getX())
+    {
+        attackRatePoint.setX (attackDurationPoint.getX());
+    }
+    
     constrainPointToModel (attackRate, MIN_RATE, MAX_RATE, attackRateArea, attackRatePoint);
 }
 
@@ -369,9 +374,7 @@ void ADSRWidget::repositionDecay()
         
         // Horizontal draggable areas are limited to height of the control point
         decayDurationArea.setBounds (attackDurationPoint.getX() + OFFSET, decayDurationPoint.getY() - OFFSET, equalSegmentWidth, POINT_SIZE);
-        
-        constrainPointToModel (decayRate, MIN_RATE, MAX_RATE, decayRateArea, decayRatePoint);
-        
+                
         if (sustainLevel > DEFAULT_SUSTAIN_LEVEL)
         {
             if (decayY <= decayRatePoint.getY())
@@ -390,6 +393,7 @@ void ADSRWidget::repositionDecay()
             decayRatePoint.setX (decayDurationPoint.getX());
         }
         
+        constrainPointToModel (decayRate, MIN_RATE, MAX_RATE, decayRateArea, decayRatePoint);
     }
     else if (sustainLevel == MAX_SUSTAIN_LEVEL)
     {
@@ -606,7 +610,7 @@ void ADSRWidget::drawGraph (juce::Graphics& g)
     g.setOpacity (1.f);
     g.strokePath (framePath, juce::PathStrokeType (4.f) );
     
-    g.setColour (juce::Colours::green);
+    g.setColour (juce::Colours::grey);
 
     if (sustainLevel > MIN_SUSTAIN_LEVEL && sustainLevel < MAX_SUSTAIN_LEVEL)
     {
